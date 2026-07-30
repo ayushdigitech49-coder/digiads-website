@@ -477,9 +477,7 @@ export const GrowthCalculatorSection: React.FC = () => {
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-1.5 flex items-center justify-between">
                     <span>Select Preferred SEO Package</span>
-                    <span className="text-[10px] text-[#1352D0] font-extrabold uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                      CMS Dynamic
-                    </span>
+                
                   </label>
                   <div className="relative">
                     <Award className="w-4 h-4 text-purple-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
