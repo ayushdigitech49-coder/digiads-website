@@ -1,0 +1,29 @@
+# Sumit DigiTech
+
+> Sumit DigiTech is Jaipur's premier unified digital growth platform consolidating 5 specialized agency squads—SEO Company Jaipur, PerformanceMarketing4U, Arvian Web Stack, Digimagnate Studio, and Quick-Commerce Onboarding—into one high-converting revenue engine.
+
+## Core Growth Divisions
+
+- [SEO & Organic Search Dominance](/services/seo-services): Enterprise technical SEO, programmatic schema, rank gap analysis, and DR 70+ editorial link building.
+- [Performance Marketing & Paid Ads](/services/performance-marketing): High-ROAS ad buying unit managing Meta, Google, YouTube, and LinkedIn ads with server-side CAPI tracking.
+- [Web & App Software Engineering](/services/web-development): Sub-second React & Next.js web applications, headless Shopify Plus stores, custom dashboards, and 99.8% SLA uptime systems.
+- [Social Media & Creative Reels Studio](/services/social-media-marketing): Platform-native short video scripts, Instagram Reels, YouTube Shorts, UGC creator networks, and viral growth funnels.
+- [Marketplace & Quick-Commerce Onboarding](/services): End-to-end account onboarding, listing optimization, and ad management for Amazon, Blinkit, Swiggy Instamart, Zepto, and Meesho.
+
+## Key Pages
+
+- [Homepage](/): Official overview of growth divisions, interactive ROI calculator, and verified stats.
+- [Services Overview](/services): Full breakdown of services and growth solutions.
+- [Work Showcase & Portfolio](/portfolio): Filterable portfolio of design, web development, and performance campaigns.
+- [Verified Case Studies](/case-studies): Detailed growth breakdowns with verified ROAS and revenue metrics.
+- [Growth Plans & Pricing](/pricing): Monthly retainer packages and enterprise custom quotes.
+- [Special Offers & Deals](/offers): Limited-time audit and marketing strategy promotions.
+- [About Agency Merger](/about): Information on Jaipur agency consolidation, leadership squad, and core values.
+- [Digital Growth Blog](/blog): In-depth playbooks on SEO, B2B SaaS lead gen, Meta CAPI, and performance marketing.
+- [Contact & Strategy Booking](/contact): Direct hotline, WhatsApp VIP desk, and strategy consultation scheduling.
+- [Free Instant Audit Tool](/free-audit): Automated AI site speed, Core Web Vitals, and rank gap analysis tool.
+
+## Technical Details
+
+- [Sitemap](/sitemap.xml): XML sitemap for search engines.
+- [Robots Directive](/robots.txt): Search engine crawler directives.

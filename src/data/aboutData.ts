@@ -1,0 +1,68 @@
+import type { AboutConfigData } from '../services/admin.service';
+
+export const defaultAboutData: AboutConfigData = {
+  heroBadge: 'Jaipur HQ • 45+ In-House Specialists',
+  heroTitleLine1: '5 Elite Jaipur Agencies.',
+  heroTitleHighlight: '1 Unified Revenue Growth Platform.',
+  heroDescription: "We unified Jaipur's top specialized marketing squads, software engineers, and creative studios into one high-converting platform.",
+  section2TitleLine1: 'The Specialized Agencies',
+  section2TitleHighlight: 'Merged Into Sumit DigiTech',
+  section3TitleLine1: 'Our Core Values',
+  section3TitleHighlight: 'Define Every Engagement',
+  mergedBrands: [
+    {
+      tag: 'SEO Division',
+      tagColor: 'bg-blue-50 text-[#1352D0] border-blue-200',
+      title: 'SEO Company Jaipur',
+      desc: 'Pioneered local and technical search engine optimization in Rajasthan, ranking 12,000+ keywords on page 1 of Google. Enterprise-grade technical SEO, programmatic schema, and DR 70+ editorial link building.',
+      stat: '12,450+',
+      statLabel: 'Page 1 Keywords',
+      accent: 'border-l-4 border-l-[#1352D0]',
+    },
+    {
+      tag: 'Performance Division',
+      tagColor: 'bg-red-50 text-[#D91212] border-red-200',
+      title: 'PerformanceMarketing4U',
+      desc: 'High-ROAS ad buying unit managing $5M+ in ad spend on Meta, Google, YouTube, and LinkedIn. Server-side CAPI tracking, WhatsApp qualification bots, and creative testing pipelines delivering 4.8x avg ROAS.',
+      stat: '₹450+ Cr',
+      statLabel: 'Ad Spend Managed',
+      accent: 'border-l-4 border-l-[#D91212]',
+    },
+    {
+      tag: 'Software Division',
+      tagColor: 'bg-slate-100 text-slate-900 border-slate-300',
+      title: 'Arvian Web Stack',
+      desc: 'Full-stack engineering division building sub-second React & Next.js portals, headless Shopify Plus migrations, custom internal tools, and SaaS dashboards with 99/100 Lighthouse scores.',
+      stat: '99.8%',
+      statLabel: 'SLA Uptime',
+      accent: 'border-l-4 border-l-slate-800',
+    },
+    {
+      tag: 'Social Division',
+      tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
+      title: 'Digimagnate Studio',
+      desc: 'Viral short-video production studio creating Instagram Reels, YouTube Shorts scripts, UGC creator networks, and influencer campaigns delivering 50M+ monthly impressions for D2C brands.',
+      stat: '50M+',
+      statLabel: 'Monthly Impressions',
+      accent: 'border-l-4 border-l-[#F4B400]',
+    },
+  ],
+  coreValues: [
+    { iconName: 'Target', color: 'bg-blue-50 text-[#1352D0]', title: 'Revenue First', desc: 'Every deliverable ties back to measurable revenue impact. No vanity metrics, no fluff. Period.' },
+    { iconName: 'ShieldCheck', color: 'bg-red-50 text-[#D91212]', title: 'Radical Transparency', desc: 'Live dashboards, weekly check-ins, and no hidden fees. You see every dollar we spend and every hour we ship.' },
+    { iconName: 'Zap', color: 'bg-amber-50 text-[#F4B400]', title: 'Extreme Speed', desc: 'Ship MVPs in 14 days, SEO migrations in 30 days, ad campaigns live in 72 hours. Speed compounds.' },
+    { iconName: 'Brain', color: 'bg-blue-50 text-[#1352D0]', title: 'AI Native Engine', desc: 'We integrate GPT, automation agents, and machine learning into every workflow to deliver 10× output per account manager.' },
+    { iconName: 'Users', color: 'bg-red-50 text-[#D91212]', title: 'Dedicated Squads', desc: 'You get a senior account manager, creative director, engineer, and media buyer. Shared Slack channel, direct phone access.' },
+    { iconName: 'Star', color: 'bg-amber-50 text-[#F4B400]', title: 'No Contract Lock-In', desc: 'No 12-month contracts. Stay with us because we deliver results month after month — not because of fine print.' },
+  ],
+  leadershipTeam: [
+    { name: 'Sumit Sharma', role: 'Founder & Chief Growth Officer', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80', division: 'Strategic Vision' },
+    { name: 'Priya Sharma', role: 'Head of Search & SEO', img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80', division: 'SEO Company Jaipur' },
+    { name: 'Aditya Verma', role: 'Director — Performance Ads', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80', division: 'PerformanceMarketing4U' },
+    { name: 'Karan Rathore', role: 'Lead Full-Stack Architect', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80', division: 'Arvian Web Stack' },
+  ],
+  metaTitle: 'About Us | Sumit DigiTech - 5 Unified Jaipur Growth Squads',
+  metaDescription: 'Discover Sumit DigiTech - Jaipur top unified agency combining SEO, performance ads, web development, and social media.',
+  metaKeywords: 'Sumit DigiTech About, SEO Company Jaipur, PerformanceMarketing4U, Arvian, Digimagnate',
+  customScript: ''
+};
