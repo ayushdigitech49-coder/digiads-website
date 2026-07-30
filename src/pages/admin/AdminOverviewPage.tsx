@@ -98,12 +98,35 @@ export const AdminOverviewPage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const localRaw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+        const localLeads: LeadItem[] = localRaw.map((l: any) => ({
+          id: l.id || 'local-' + Math.random().toString(36).substring(2, 9),
+          fullName: l.name || l.fullName || 'Anonymous',
+          email: l.email || '',
+          phone: l.phone || '',
+          companyName: l.websiteUrl || l.companyName || '',
+          serviceRequired: l.serviceRequired || `SEO Cost Calculator (${l.websiteType || 'SEO'})`,
+          budget: l.estimatedBudget || l.budget || '₹8,000/mo',
+          message: l.message && l.message.includes('City:') ? l.message : `City: ${l.city || 'N/A'} | Target: ${l.targetLocation || 'N/A'} | Keywords: ${l.keywordTier || 'N/A'} | Tech: ${l.techStack || 'N/A'} | Note: ${l.message || 'None'}`,
+          source: l.source || 'SEO Calculator',
+          status: l.status || 'New',
+          createdAt: l.createdAt || new Date().toISOString()
+        }));
+
         const [leadRes, secRes] = await Promise.all([
-          adminService.getLeads(),
-          adminService.getSections(),
+          adminService.getLeads().catch(() => ({ success: false, leads: [] })),
+          adminService.getSections().catch(() => ({ success: false, sections: [] })),
         ]);
-        if (leadRes.success) setLeads(leadRes.leads);
-        if (secRes.success) setSections(secRes.sections);
+
+        if (secRes && secRes.success) setSections(secRes.sections);
+
+        if (leadRes && leadRes.success && Array.isArray(leadRes.leads)) {
+          const map = new Map<string, LeadItem>();
+          [...localLeads, ...leadRes.leads].forEach(item => map.set(item.id, item));
+          setLeads(Array.from(map.values()));
+        } else {
+          setLeads(localLeads);
+        }
       } catch {
       } finally {
         setLoading(false);

@@ -28,7 +28,7 @@ import {
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { Logo, LogoIcon } from '../common/Logo';
 import { Swal } from '../../utils/swal.tsx';
-import { notifyCmsUpdate } from '../../utils/broadcastSync';
+import { notifyCmsUpdate, subscribeCmsUpdate } from '../../utils/broadcastSync';
 
 const sidebarSections = [
   {
@@ -75,6 +75,26 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const [profileOpen, setProfileOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [contentKey, setContentKey] = useState(0);
+  const [notificationLeads, setNotificationLeads] = useState<any[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const loadNotifications = () => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+      setNotificationLeads(raw);
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    return subscribeCmsUpdate((type) => {
+      if (type === 'leads' || type === 'all') {
+        loadNotifications();
+      }
+    });
+  }, []);
+
+  const unreadCount = notificationLeads.filter((l: any) => l.status === 'New' || !l.status).length;
 
   // Auto Reset Scroll Position to Top on Page Navigation
   useEffect(() => {
@@ -271,15 +291,86 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
 
-            {/* Bell Notifications */}
-            <button
-              onClick={() => Swal.toast('No unread admin notifications', 'info')}
-              className="relative p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#D91212]" />
-            </button>
+            {/* Interactive Bell Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="relative p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+                title="Incoming Lead Notifications"
+              >
+                <Bell className="w-4 h-4 text-slate-700" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 px-1.5 py-0.2 min-w-[18px] h-[18px] rounded-full bg-[#D91212] text-white text-[10px] font-black flex items-center justify-center border-2 border-white shadow-xs animate-bounce">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <AnimatePresence>
+                {notifOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    className="absolute right-0 top-full mt-2 w-80 rounded-2xl bg-white border border-slate-200 shadow-2xl overflow-hidden z-50 text-slate-900"
+                  >
+                    <div className="p-3.5 bg-slate-900 text-white flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Bell className="w-4 h-4 text-emerald-400" />
+                        <span className="text-xs font-black uppercase tracking-wider">Lead Notifications</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                        {unreadCount} New
+                      </span>
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                      {notificationLeads.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-400 font-medium">
+                          No lead notifications yet.
+                        </div>
+                      ) : (
+                        notificationLeads.slice(0, 5).map((l: any, i: number) => (
+                          <div
+                            key={l.id || i}
+                            onClick={() => {
+                              setNotifOpen(false);
+                              navigate('/admin/leads');
+                            }}
+                            className="p-3 hover:bg-blue-50/60 transition-colors cursor-pointer space-y-1"
+                          >
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-extrabold text-slate-900 truncate">{l.name || l.fullName}</span>
+                              <span className="text-[10px] font-bold text-slate-400">
+                                {l.createdAt ? new Date(l.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                              </span>
+                            </div>
+                            <div className="text-[11px] font-bold text-[#1352D0] truncate">
+                              {l.serviceRequired || l.websiteType || 'SEO Inquiry'}
+                            </div>
+                            <div className="text-[10px] font-medium text-slate-500 truncate">
+                              📞 {l.phone} | 📍 {l.city || 'India'}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+                      <button
+                        onClick={() => {
+                          setNotifOpen(false);
+                          navigate('/admin/leads');
+                        }}
+                        className="text-xs font-black text-[#1352D0] hover:underline cursor-pointer"
+                      >
+                        View All Leads Inbox →
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             <div className="h-6 w-px bg-slate-200 mx-1" />
 

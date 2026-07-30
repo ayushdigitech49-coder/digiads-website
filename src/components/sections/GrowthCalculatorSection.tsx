@@ -1,36 +1,44 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calculator,
-  TrendingUp,
-  BarChart3,
-  Zap,
-  ArrowRight,
-  Sliders,
   CheckCircle2,
   Sparkles,
   Check,
-  Award
+  Award,
+  Globe,
+  Smartphone,
+  Layers,
+  ArrowRight,
+  ShieldCheck,
+  Cpu,
+  Mail,
+  User,
+  Phone,
+  MapPin,
+  MessageSquare,
+  Search
 } from 'lucide-react';
 import { useModal } from '../../context/ModalContext';
 import { pricingPlans } from '../../data/pricingData';
 import type { PricingPlan } from '../../types';
 import { adminService } from '../../services/admin.service';
-import { subscribeCmsUpdate } from '../../utils/broadcastSync';
+import { subscribeCmsUpdate, notifyCmsUpdate } from '../../utils/broadcastSync';
 
-const INDUSTRIES = [
-  { id: 'real_estate', label: 'Real Estate', multiplier: 2.5, avgRoas: 4.5 },
-  { id: 'ecommerce', label: 'E-commerce', multiplier: 2.8, avgRoas: 5.2 },
-  { id: 'healthcare', label: 'Healthcare', multiplier: 2.4, avgRoas: 4.2 },
-  { id: 'education', label: 'Education', multiplier: 2.3, avgRoas: 4.0 },
-  { id: 'saas', label: 'SaaS & Tech', multiplier: 3.2, avgRoas: 6.0 },
-  { id: 'local_business', label: 'Local Business', multiplier: 2.2, avgRoas: 3.8 },
-  { id: 'finance', label: 'Finance & Banking', multiplier: 3.0, avgRoas: 5.5 },
-  { id: 'other', label: 'Other Industry', multiplier: 2.5, avgRoas: 4.4 },
+const COUNTRY_CODES = [
+  { code: '+91', flag: '🇮🇳', country: 'India' },
+  { code: '+1', flag: '🇺🇸', country: 'USA/Canada' },
+  { code: '+44', flag: '🇬🇧', country: 'UK' },
+  { code: '+971', flag: '🇦🇪', country: 'UAE' },
+  { code: '+61', flag: '🇦🇺', country: 'Australia' },
+  { code: '+49', flag: '🇩🇪', country: 'Germany' },
+  { code: '+65', flag: '🇸🇬', country: 'Singapore' },
+  { code: '+966', flag: '🇸🇦', country: 'Saudi Arabia' },
+  { code: '+974', flag: '🇶🇦', country: 'Qatar' },
 ];
 
 export const GrowthCalculatorSection: React.FC = () => {
-  const { openAuditModal } = useModal();
+  const { openConsultationModal } = useModal();
 
   // Dynamic Pricing Plans from CMS
   const [plans, setPlans] = useState<PricingPlan[]>(() => {
@@ -40,8 +48,6 @@ export const GrowthCalculatorSection: React.FC = () => {
     }
     return pricingPlans;
   });
-
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('growth-seo');
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -64,426 +70,592 @@ export const GrowthCalculatorSection: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Selected Plan Object
-  const currentPlan = useMemo(() => {
-    return plans.find(p => p.id === selectedPlanId);
-  }, [plans, selectedPlanId]);
+  // Form State
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [phone, setPhone] = useState('');
+  const [city, setCity] = useState('');
+  const [websiteType, setWebsiteType] = useState<string>('Business / Service Website');
+  const [targetLocation, setTargetLocation] = useState<string>('National, Country');
+  const [keywordTier, setKeywordTier] = useState<string>('10 to 15');
+  const [selectedPackageId, setSelectedPackageId] = useState<string>('auto');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [message, setMessage] = useState('');
 
-  // Inputs
-  const [budget, setBudget] = useState<number>(8000);
-  const [currentLeads, setCurrentLeads] = useState<number>(50);
-  const [selectedIndustry, setSelectedIndustry] = useState<string>('ecommerce');
-  const [conversionRate, setConversionRate] = useState<number>(3.0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Sync budget when package changes
-  const handlePlanSelect = (planId: string) => {
-    setSelectedPlanId(planId);
-    if (planId !== 'custom') {
-      const plan = plans.find(p => p.id === planId);
-      if (plan && plan.priceMonthly) {
-        setBudget(plan.priceMonthly);
+  // Dynamic Tech Stack Detector
+  const detectedTech = useMemo(() => {
+    if (!websiteUrl || websiteUrl.trim().length < 4) return null;
+    const url = websiteUrl.toLowerCase();
+    if (url.includes('wp') || url.includes('wordpress') || url.includes('elementor')) {
+      return { name: 'WordPress & Elementor CMS', icon: '⚡', category: 'CMS', seoScore: '94/100' };
+    }
+    if (url.includes('shopify') || url.includes('store') || url.includes('buy') || url.includes('cart')) {
+      return { name: 'Shopify E-Commerce Platform', icon: '🛍️', category: 'E-Commerce', seoScore: '92/100' };
+    }
+    if (url.includes('next') || url.includes('react') || url.includes('vercel') || url.includes('app') || url.includes('io')) {
+      return { name: 'React / Next.js Headless Web Stack', icon: '🚀', category: 'Headless Framework', seoScore: '98/100' };
+    }
+    if (url.includes('wix') || url.includes('squarespace')) {
+      return { name: 'Site Builder (Wix / Squarespace)', icon: '🌐', category: 'Website Builder', seoScore: '85/100' };
+    }
+    return { name: 'Custom HTML5 & PHP Infrastructure', icon: '💻', category: 'Custom Web App', seoScore: '90/100' };
+  }, [websiteUrl]);
+
+  // Dynamic Estimated Cost & Recommended Package Calculation
+  const calculation = useMemo(() => {
+    let basePrice = 5000;
+    let recPlanId = 'starter-seo';
+
+    // Location Multiplier
+    if (targetLocation.includes('National')) {
+      basePrice = 8000;
+      recPlanId = 'growth-seo';
+    } else if (targetLocation.includes('International')) {
+      basePrice = 15000;
+      recPlanId = 'advanced-seo';
+    }
+
+    // Keyword Tier Adjustments
+    if (keywordTier.includes('5 to 10')) {
+      if (basePrice < 5000) basePrice = 5000;
+    } else if (keywordTier.includes('10 to 15')) {
+      if (basePrice < 8000) basePrice = 8000;
+      recPlanId = recPlanId === 'starter-seo' ? 'growth-seo' : recPlanId;
+    } else if (keywordTier.includes('15 to 30')) {
+      basePrice = Math.max(basePrice, 10000);
+      recPlanId = 'advanced-seo';
+    } else if (keywordTier.includes('30 to 50')) {
+      basePrice = Math.max(basePrice, 18000);
+      recPlanId = 'advanced-seo';
+    }
+
+    // Website Type Multipliers
+    if (websiteType.includes('Ecommerce')) {
+      basePrice = Math.round(basePrice * 1.25);
+    } else if (websiteType.includes('Custom')) {
+      basePrice = Math.round(basePrice * 1.35);
+    }
+
+    // Override if user selected specific package from Dropdown
+    if (selectedPackageId !== 'auto') {
+      recPlanId = selectedPackageId;
+      const customSelected = plans.find(p => p.id === selectedPackageId);
+      if (customSelected && customSelected.priceMonthly) {
+        basePrice = customSelected.priceMonthly;
       }
     }
-  };
 
-  const [hasCalculated, setHasCalculated] = useState<boolean>(true);
-  const [isCalculating, setIsCalculating] = useState<boolean>(false);
-
-  // Growth Calculations
-  const calculations = useMemo(() => {
-    const indData = INDUSTRIES.find(i => i.id === selectedIndustry) || INDUSTRIES[0];
-    
-    // Calculated projections
-    const multiplier = indData.multiplier;
-    const projectedLeads = Math.round(currentLeads > 0 ? currentLeads * multiplier : (budget / 800) * 1.5);
-    const growthPercent = Math.round(((projectedLeads - currentLeads) / (currentLeads || 1)) * 100);
-    const estimatedRoas = indData.avgRoas.toFixed(1);
-    
-    // Revenue projection (approx formula based on lead value and conversion)
-    const estimatedDealValue = budget > 200000 ? 45000 : 25000;
-    const currentRevenue = currentLeads * (conversionRate / 100) * estimatedDealValue;
-    const projectedRevenue = projectedLeads * ((conversionRate * 1.35) / 100) * estimatedDealValue;
-    const revenueGrowth = Math.max(0, projectedRevenue - currentRevenue);
+    const matchedPlan = plans.find(p => p.id === recPlanId) || plans[1] || plans[0];
 
     return {
-      projectedLeads,
-      growthPercent: Math.max(20, growthPercent),
-      estimatedRoas: `${estimatedRoas}x`,
-      revenueGrowth: revenueGrowth > 0 
-        ? `+₹${(revenueGrowth / 100000).toFixed(1)} Lakhs` 
-        : `+₹${((budget * multiplier) / 100000).toFixed(1)} Lakhs`,
+      monthlyEstimate: basePrice.toLocaleString('en-IN'),
+      plan: matchedPlan,
+      keywordCount: keywordTier,
     };
-  }, [budget, currentLeads, selectedIndustry, conversionRate]);
+  }, [websiteType, targetLocation, keywordTier, selectedPackageId, plans]);
 
-  const handleCalculate = (e: React.FormEvent) => {
+  // Handle Form Submission
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsCalculating(true);
+    if (!name || !email || !phone || !websiteUrl) {
+      alert('Please fill in all required fields (Name, Email, Phone Number, and Website URL).');
+      return;
+    }
+
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+      alert('Please enter a valid phone number (between 7 and 15 digits).');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const leadData = {
+      id: 'lead-' + Date.now(),
+      name,
+      email,
+      phone: `${countryCode} ${phone}`,
+      city: city || 'Not specified',
+      websiteType,
+      targetLocation,
+      keywordTier,
+      websiteUrl,
+      message,
+      techStack: detectedTech ? detectedTech.name : 'Unknown',
+      estimatedBudget: `₹${calculation.monthlyEstimate}/month`,
+      recommendedPackage: calculation.plan.name,
+      createdAt: new Date().toISOString(),
+      status: 'New'
+    };
+
+    // Save to local storage for instant dashboard updates
+    try {
+      const existing = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+      localStorage.setItem('sumit_leads', JSON.stringify([leadData, ...existing]));
+      notifyCmsUpdate('leads');
+
+      // Also dispatch to backend API if available
+      await adminService.createLead({
+        name,
+        email,
+        phone: `${countryCode} ${phone}`,
+        company: websiteUrl,
+        service: `SEO Cost Calculator (${websiteType})`,
+        budget: `₹${calculation.monthlyEstimate}/mo`,
+        message: `City: ${city} | Target: ${targetLocation} | Keywords: ${keywordTier} | Tech: ${detectedTech?.name || 'N/A'} | Note: ${message}`
+      });
+    } catch {}
+
     setTimeout(() => {
-      setIsCalculating(false);
-      setHasCalculated(true);
-    }, 400);
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+    }, 600);
   };
 
   return (
-    <section className="relative py-24 bg-[linear-gradient(180deg,#F8FBFF_0%,#F2F7FF_100%)] text-slate-900 overflow-hidden font-sans border-y border-blue-100/80">
-      
-      {/* LIGHT BACKGROUND MESH GRID & AMBIENT BLUE GLOWS */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-10 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-indigo-400/10 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(19,82,208,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(19,82,208,0.04)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,#000_70%,transparent_100%)] opacity-70" />
-      </div>
+    <section id="seo-calculator" className="py-16 sm:py-24 bg-gradient-to-b from-[#0F172A] via-[#1D2B53] to-[#0F172A] text-white relative overflow-hidden">
+      {/* Background Decorative Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-[#1352D0]/30 to-purple-600/20 blur-[130px] pointer-events-none rounded-full" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* SECTION HEADER */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white border border-blue-200 text-[#1352D0] text-xs font-black shadow-sm"
-          >
-            <Calculator className="w-3.5 h-3.5 text-[#1352D0]" />
-            <span className="uppercase tracking-widest">Interactive Growth Estimator</span>
-          </motion.div>
+        <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
+          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#1352D0]/20 border border-[#1352D0]/40 text-[#4D8BFF] text-xs font-black tracking-widest uppercase shadow-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Instant SEO Cost Estimator & Tech Detector</span>
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight"
-          >
-            Growth Potential <span className="text-[#1352D0]">Calculator</span>
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-slate-600 text-sm sm:text-base leading-relaxed font-normal"
-          >
-            See how strategic SEO, AI Search Optimization, and Performance Marketing can impact your business growth.
-          </motion.p>
+          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
+            Get your Affordable approx. <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">SEO Cost Quickly</span> within 1 Min in your Email
+          </h2>
+          <p className="text-slate-300 text-sm sm:text-base font-medium">
+            Fill in your website details below to receive a personalized SEO budget breakdown, target keyword recommendations, and technology analysis.
+          </p>
         </div>
 
-        {/* CALCULATOR MAIN GRID (LEFT: INPUT FORM, RIGHT: RESULTS) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          
-          {/* LEFT SIDE: INPUT FORM CARD (LIGHT GLASS CARDS) */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-6 rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 space-y-6 shadow-[0_10px_35px_rgba(19,82,208,0.07)] flex flex-col justify-between"
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="flex items-center space-x-2">
-                <Sliders className="w-5 h-5 text-[#1352D0]" />
-                <h3 className="text-lg font-black text-slate-900">Input Your Metrics</h3>
-              </div>
-              <span className="text-[10px] font-black text-[#1352D0] uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                Live Calculator
-              </span>
-            </div>
+        {/* MAIN CALCULATOR CONTAINER GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <form onSubmit={handleCalculate} className="space-y-5">
+          {/* LEFT FORM PANEL (7 COLS) */}
+          <div className="lg:col-span-7 bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200/90 relative">
+            
+            {isSubmitted ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12 space-y-6"
+              >
+                <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md">
+                  <CheckCircle2 className="w-12 h-12" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-slate-900">SEO Cost Breakdown Prepared!</h3>
+                  <p className="text-slate-600 text-sm max-w-md mx-auto">
+                    Thank you, <strong className="text-slate-900">{name}</strong>! Your estimated SEO investment breakdown has been generated and sent to <span className="text-[#1352D0] font-extrabold">{email}</span>.
+                  </p>
+                </div>
 
-              {/* 1. SELECT GROWTH PACKAGE / CATEGORY */}
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-2">
-                  1. Select SEO Growth Package / Retainer
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  {plans.slice(0, 3).map(p => {
-                    const isSelected = selectedPlanId === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => handlePlanSelect(p.id)}
-                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-blue-50/90 border-[#1352D0] ring-2 ring-[#1352D0]/20 shadow-sm'
-                            : 'bg-slate-50 border-slate-200 hover:bg-slate-100/80'
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left max-w-md mx-auto space-y-2 text-xs">
+                  <div className="flex justify-between font-bold text-slate-700">
+                    <span>Estimated Investment:</span>
+                    <span className="text-emerald-600 font-extrabold text-sm">₹{calculation.monthlyEstimate} / month</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-slate-700">
+                    <span>Recommended Package:</span>
+                    <span className="text-[#1352D0] font-extrabold">{calculation.plan.name}</span>
+                  </div>
+                  {detectedTech && (
+                    <div className="flex justify-between font-bold text-slate-700 pt-1 border-t border-slate-200">
+                      <span>Detected Technology:</span>
+                      <span className="text-purple-700 font-extrabold">{detectedTech.name}</span>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="px-6 py-3 rounded-full bg-slate-900 text-white font-extrabold text-xs inline-flex items-center space-x-2 hover:bg-slate-800 transition-all cursor-pointer shadow-md"
+                >
+                  <span>← Calculate for Another Website</span>
+                </button>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* NAME & EMAIL */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                      Name <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        placeholder="Your Name"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                      Email <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="Your Email"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* PHONE WITH COUNTRY CODE & CITY */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                      Phone Number <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <select
+                        value={countryCode}
+                        onChange={e => setCountryCode(e.target.value)}
+                        className="w-24 sm:w-28 px-2.5 py-3 rounded-xl bg-slate-100 border border-slate-200 text-xs font-black text-slate-800 focus:bg-white focus:border-[#1352D0] focus:outline-none cursor-pointer shrink-0 appearance-none"
+                      >
+                        {COUNTRY_CODES.map(c => (
+                          <option key={c.code + c.country} value={c.code}>
+                            {c.flag} {c.code}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={e => setPhone(e.target.value)}
+                        placeholder="Your Phone"
+                        className="flex-1 min-w-0 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                      City
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={e => setCity(e.target.value)}
+                        placeholder="Your City"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* WEBSITE TYPE */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
+                    What is the type of your website? <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {[
+                      'Personal Website',
+                      'Business / Service Website',
+                      'Ecommerce Website',
+                      'Custom Website'
+                    ].map((type) => (
+                      <label
+                        key={type}
+                        className={`flex items-center space-x-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                          websiteType === type
+                            ? 'bg-blue-50/90 border-[#1352D0] text-[#1352D0] font-black shadow-xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold'
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs font-extrabold ${isSelected ? 'text-[#1352D0]' : 'text-slate-900'}`}>
-                            {p.name}
+                        <input
+                          type="radio"
+                          name="websiteType"
+                          checked={websiteType === type}
+                          onChange={() => setWebsiteType(type)}
+                          className="w-4 h-4 text-[#1352D0] focus:ring-[#1352D0]"
+                        />
+                        <span className="text-xs">{type}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* LOCATION & KEYWORDS GRID */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  
+                  {/* TARGET AUDIENCE LOCATION */}
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
+                      Target audience Location <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      {[
+                        'Local, city',
+                        'National, Country',
+                        'International, More then One Country'
+                      ].map((loc) => (
+                        <label
+                          key={loc}
+                          className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all cursor-pointer ${
+                            targetLocation === loc
+                              ? 'bg-blue-50/90 border-[#1352D0] text-[#1352D0] font-black shadow-xs'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="targetLocation"
+                            checked={targetLocation === loc}
+                            onChange={() => setTargetLocation(loc)}
+                            className="w-4 h-4 text-[#1352D0] focus:ring-[#1352D0]"
+                          />
+                          <span className="text-xs">{loc}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* KEYWORDS TO TARGET */}
+                  <div>
+                    <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
+                      Keywords to Target <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="space-y-2">
+                      {[
+                        '5 to 10 Keywords',
+                        '10 to 15 Keywords',
+                        '15 to 30 Keywords',
+                        '30 to 50 Keywords'
+                      ].map((kw) => (
+                        <label
+                          key={kw}
+                          className={`flex items-center space-x-3 p-2.5 rounded-xl border transition-all cursor-pointer ${
+                            keywordTier === kw
+                              ? 'bg-blue-50/90 border-[#1352D0] text-[#1352D0] font-black shadow-xs'
+                              : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="keywordTier"
+                            checked={keywordTier === kw}
+                            onChange={() => setKeywordTier(kw)}
+                            className="w-4 h-4 text-[#1352D0] focus:ring-[#1352D0]"
+                          />
+                          <span className="text-xs">{kw}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* PREFERRED SEO PACKAGE DROPDOWN */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-800 mb-1.5 flex items-center justify-between">
+                    <span>Select Preferred SEO Package</span>
+                    <span className="text-[10px] text-[#1352D0] font-extrabold uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                      CMS Dynamic
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <Award className="w-4 h-4 text-purple-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <select
+                      value={selectedPackageId}
+                      onChange={e => setSelectedPackageId(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all cursor-pointer appearance-none"
+                    >
+                      <option value="auto">✨ Auto-Recommend Best Package Based on Requirements</option>
+                      {plans.map(p => (
+                        <option key={p.id} value={p.id}>
+                          🔹 {p.name} — ₹{p.priceMonthly ? p.priceMonthly.toLocaleString('en-IN') : 'Custom'}/month ({p.description || p.highlight || 'Guaranteed Indexing & Ranking'})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* WEBSITE URL WITH REAL-TIME TECH DETECTOR */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                    Website URL <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Globe className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      value={websiteUrl}
+                      onChange={e => setWebsiteUrl(e.target.value)}
+                      placeholder="e.g. https://yourcompany.com"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                    />
+                  </div>
+
+                  {/* REAL-TIME DYNAMIC TECH STACK BADGE */}
+                  {detectedTech && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2.5 p-3 rounded-xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/80 flex items-center justify-between shadow-xs"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg">{detectedTech.icon}</span>
+                        <div className="text-xs font-black text-purple-950 flex items-center space-x-1.5">
+                          <span>Detected Tech: {detectedTech.name}</span>
+                          <span className="px-1.5 py-0.2 rounded bg-purple-200 text-purple-800 text-[10px] font-extrabold">
+                            {detectedTech.category}
                           </span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-[#1352D0] shrink-0" />}
                         </div>
-                        <div className="text-sm font-black text-slate-900 mt-1">
-                          ₹{p.priceMonthly.toLocaleString('en-IN')}<span className="text-[10px] font-semibold text-slate-500">/mo</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Package Features Preview Checklist */}
-              {currentPlan && (
-                <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-2">
-                  <div className="flex items-center space-x-1.5 text-xs font-black text-[#1352D0] uppercase tracking-wider">
-                    <Award className="w-3.5 h-3.5 text-[#1352D0]" />
-                    <span>Included in {currentPlan.name}:</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                    {currentPlan.features.map((feat, idx) => (
-                      <div key={idx} className="flex items-start space-x-1.5 text-[11px] font-bold text-slate-700">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>{feat}</span>
                       </div>
-                    ))}
-                  </div>
+                    </motion.div>
+                  )}
                 </div>
-              )}
-              
-              {/* 2. Monthly Marketing Budget */}
-              <div>
-                <div className="flex justify-between text-xs font-black uppercase tracking-wider mb-2">
-                  <label htmlFor="calc-budget" className="text-slate-700">2. Monthly Marketing Budget (₹)</label>
-                  <span className="text-[#1352D0] font-extrabold">₹{budget.toLocaleString('en-IN')}</span>
-                </div>
-                <input
-                  id="calc-budget"
-                  type="number"
-                  min={5000}
-                  step={1000}
-                  value={budget}
-                  onChange={e => {
-                    setBudget(Number(e.target.value));
-                    setSelectedPlanId('custom');
-                  }}
-                  placeholder="Enter monthly marketing budget"
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                />
-                <input
-                  type="range"
-                  aria-label="Monthly Marketing Budget Range Slider"
-                  min={5000}
-                  max={200000}
-                  step={1000}
-                  value={budget}
-                  onChange={e => {
-                    setBudget(Number(e.target.value));
-                    setSelectedPlanId('custom');
-                  }}
-                  className="w-full mt-2 accent-[#1352D0] cursor-pointer"
-                />
-              </div>
 
-              {/* 2. Current Monthly Leads */}
-              <div>
-                <label htmlFor="calc-current-leads" className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-2">
-                  2. Current Monthly Leads
-                </label>
-                <input
-                  id="calc-current-leads"
-                  type="number"
-                  min={1}
-                  value={currentLeads}
-                  onChange={e => setCurrentLeads(Number(e.target.value))}
-                  placeholder="Enter current leads"
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                />
-              </div>
-
-              {/* 3. Industry Dropdown */}
-              <div>
-                <label htmlFor="calc-industry" className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-2">
-                  3. Industry Sector
-                </label>
-                <div className="relative">
-                  <select
-                    id="calc-industry"
-                    value={selectedIndustry}
-                    onChange={e => setSelectedIndustry(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none appearance-none cursor-pointer"
-                  >
-                    {INDUSTRIES.map(ind => (
-                      <option key={ind.id} value={ind.id} className="bg-white text-slate-900">
-                        {ind.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 font-bold">
-                    ▼
-                  </div>
-                </div>
-              </div>
-
-              {/* 4. Current Conversion Rate (%) */}
-              <div>
-                <div className="flex justify-between text-xs font-black uppercase tracking-wider mb-2">
-                  <label htmlFor="calc-conversion-rate" className="text-slate-700">4. Current Conversion Rate (%)</label>
-                  <span className="text-emerald-600 font-extrabold">{conversionRate}%</span>
-                </div>
-                <input
-                  id="calc-conversion-rate"
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  max="50"
-                  value={conversionRate}
-                  onChange={e => setConversionRate(Number(e.target.value))}
-                  placeholder="Enter conversion rate percentage"
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                />
-                <input
-                  type="range"
-                  aria-label="Current Conversion Rate Percentage Range Slider"
-                  min={0.5}
-                  max={20}
-                  step={0.1}
-                  value={conversionRate}
-                  onChange={e => setConversionRate(Number(e.target.value))}
-                  className="w-full mt-2 accent-emerald-600 cursor-pointer"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isCalculating}
-                className="w-full py-4 bg-[#1352D0] hover:bg-blue-600 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-blue-600/25 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center space-x-2 cursor-pointer mt-4"
-              >
-                <Zap className="w-4 h-4 text-white" />
-                <span>{isCalculating ? 'Computing Projections...' : 'Calculate Growth Potential'}</span>
-              </button>
-
-            </form>
-          </motion.div>
-
-          {/* RIGHT SIDE: RESULTS CARD & VISUAL COMPARISON (HIGH CONTRAST PREMIUM CARD) */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-6 rounded-3xl bg-white border border-slate-200/90 p-6 sm:p-8 space-y-6 shadow-[0_10px_35px_rgba(19,82,208,0.07)] flex flex-col justify-between relative overflow-hidden"
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-lg font-black text-slate-900">Projected Growth Results</h3>
-              </div>
-              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black uppercase tracking-wider">
-                AI Growth Projection
-              </span>
-            </div>
-
-            {/* 4 CORE METRICS CARDS */}
-            <div className="grid grid-cols-2 gap-4">
-              
-              {/* Card 1: Projected Monthly Leads */}
-              <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                  Estimated Monthly Leads
-                </span>
-                <div className="text-2xl sm:text-3xl font-black text-[#1352D0] flex items-baseline space-x-1">
-                  <span>{calculations.projectedLeads}</span>
-                  <span className="text-xs font-bold text-slate-500">leads/mo</span>
-                </div>
-                <span className="text-[10px] font-extrabold text-emerald-600 block">
-                  vs {currentLeads} current leads
-                </span>
-              </div>
-
-              {/* Card 2: Growth Potential % */}
-              <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                  Growth Potential
-                </span>
-                <div className="text-2xl sm:text-3xl font-black text-emerald-600">
-                  +{calculations.growthPercent}%
-                </div>
-                <span className="text-[10px] font-extrabold text-slate-500 block">
-                  Lead Surge Potential
-                </span>
-              </div>
-
-              {/* Card 3: Estimated Revenue Growth */}
-              <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                  Estimated Revenue Growth
-                </span>
-                <div className="text-xl sm:text-2xl font-black text-slate-900">
-                  {calculations.revenueGrowth}
-                </div>
-                <span className="text-[10px] font-extrabold text-blue-600 block">
-                  Projected Annual Lift
-                </span>
-              </div>
-
-              {/* Card 4: Estimated ROAS */}
-              <div className="p-4 rounded-2xl bg-violet-50/60 border border-violet-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                  Estimated ROAS
-                </span>
-                <div className="text-2xl sm:text-3xl font-black text-violet-700">
-                  {calculations.estimatedRoas}
-                </div>
-                <span className="text-[10px] font-extrabold text-slate-500 block">
-                  Target Ad Return
-                </span>
-              </div>
-
-            </div>
-
-            {/* VISUAL COMPARISON BARS */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-700 block">
-                Visual Lead Comparison
-              </span>
-              
-              {/* Current Leads Bar */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                  <span>Current State</span>
-                  <span>{currentLeads} Leads</span>
-                </div>
-                <div className="h-3 rounded-full bg-slate-200 overflow-hidden">
-                  <div
-                    style={{ width: `${Math.min(100, (currentLeads / (calculations.projectedLeads || 1)) * 100)}%` }}
-                    className="h-full bg-slate-400 transition-all duration-500"
+                {/* MESSAGE */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                    Write your Message
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={message}
+                    onChange={e => setMessage(e.target.value)}
+                    placeholder="Write Your Message here..."
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all resize-none"
                   />
                 </div>
+
+                {/* SUBMIT BUTTON */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#00C853] hover:bg-[#00E676] active:scale-95 text-white font-extrabold text-sm sm:text-base tracking-wide transition-all shadow-lg shadow-green-500/25 flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <span>Calculating SEO Cost...</span>
+                  ) : (
+                    <>
+                      <span>Get SEO Cost</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </button>
+
+              </form>
+            )}
+
+          </div>
+
+          {/* RIGHT SIDE: LIVE ESTIMATE & RECOMMENDED CMS PACKAGE (5 COLS) */}
+          <div className="lg:col-span-5 space-y-6">
+            
+            {/* LIVE PRICE BREAKDOWN CARD */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-xl space-y-6">
+              
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div className="flex items-center space-x-2">
+                  <Calculator className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-sm font-black uppercase tracking-wider text-white">
+                    SEO Investment Estimate
+                  </h3>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
+                  Instant Quote
+                </span>
               </div>
 
-              {/* Projected Leads Bar */}
+              {/* MONTHLY ESTIMATE DISPLAY */}
               <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold text-[#1352D0]">
-                  <span>Projected with Sumit DigiTech</span>
-                  <span>{calculations.projectedLeads} Leads (+{calculations.growthPercent}%)</span>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Estimated Monthly Investment:
                 </div>
-                <div className="h-3 rounded-full bg-slate-200 overflow-hidden">
-                  <div
-                    style={{ width: '100%' }}
-                    className="h-full bg-gradient-to-r from-[#1352D0] to-emerald-500 transition-all duration-500 shadow-sm"
-                  />
+                <div className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-baseline space-x-2">
+                  <span className="text-emerald-400">₹{calculation.monthlyEstimate}</span>
+                  <span className="text-sm font-bold text-slate-400">/ month</span>
+                </div>
+                <div className="text-[11px] font-bold text-slate-400 pt-1">
+                  Targeting <strong>{keywordTier}</strong> in <strong>{targetLocation}</strong>
                 </div>
               </div>
-            </div>
 
-            {/* CLAIM GROWTH CTA BUTTON */}
-            <div className="space-y-3 pt-2">
+              {/* RECOMMENDED PACKAGE CARD */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-900/40 via-slate-900 to-indigo-950/60 border border-blue-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-black uppercase text-blue-400 flex items-center space-x-1.5">
+                    <Award className="w-4 h-4 text-amber-400" />
+                    <span>Recommended CMS Package:</span>
+                  </div>
+                  <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-extrabold uppercase">
+                    Best Match
+                  </span>
+                </div>
+
+                <div className="text-xl font-black text-white">
+                  {calculation.plan.name}
+                </div>
+
+                <ul className="space-y-2 pt-1 text-xs text-slate-300 font-medium">
+                  {calculation.plan.features.slice(0, 5).map((f, idx) => (
+                    <li key={idx} className="flex items-center space-x-2">
+                      <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* WHY CHOOSE SUMIT DIGITECH GUARANTEES */}
+              <div className="space-y-3 pt-2 text-xs text-slate-300 font-medium">
+                <div className="flex items-center space-x-2.5 text-slate-200 font-bold">
+                  <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span>30-40% Indexing & Keyword Ranking Guarantee</span>
+                </div>
+                <div className="flex items-center space-x-2.5 text-slate-200 font-bold">
+                  <Cpu className="w-4 h-4 text-purple-400 shrink-0" />
+                  <span>AI Search & Google AI Overviews Optimization</span>
+                </div>
+                <div className="flex items-center space-x-2.5 text-slate-200 font-bold">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Dedicated Account Manager & Bi-weekly Audit Reports</span>
+                </div>
+              </div>
+
+              {/* ACTION BUTTON */}
               <button
-                onClick={openAuditModal}
-                className="w-full py-4 bg-[#1352D0] hover:bg-blue-600 text-white font-extrabold text-sm rounded-2xl shadow-xl shadow-blue-600/25 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center space-x-2 cursor-pointer"
+                onClick={() => openConsultationModal()}
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#1352D0] to-blue-600 hover:from-blue-600 hover:to-[#1352D0] text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow-md shadow-blue-500/20 flex items-center justify-center space-x-2 cursor-pointer"
               >
-                <span>Claim This Growth - Get Free Audit</span>
-                <ArrowRight className="w-4 h-4 text-white" />
+                <span>Book Free 1-on-1 SEO Strategy Call</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
 
-              {/* Disclaimer */}
-              <p className="text-[10px] text-slate-500 font-medium text-center leading-normal px-2">
-                * Results are estimated projections and may vary based on market conditions, budget allocation, and campaign execution.
-              </p>
             </div>
 
-          </motion.div>
+          </div>
 
         </div>
 
@@ -491,3 +663,6 @@ export const GrowthCalculatorSection: React.FC = () => {
     </section>
   );
 };
+
+// Also export as SeoCalculatorSection alias for maximum compatibility
+export const SeoCalculatorSection = GrowthCalculatorSection;

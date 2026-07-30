@@ -29,11 +29,37 @@ export const AdminLeadsPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      const localRaw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+      const localLeads: LeadItem[] = localRaw.map((l: any) => ({
+        id: l.id || 'local-' + Math.random().toString(36).substring(2, 9),
+        fullName: l.name || l.fullName || 'Anonymous',
+        email: l.email || '',
+        phone: l.phone || '',
+        companyName: l.websiteUrl || l.companyName || '',
+        serviceRequired: l.serviceRequired || `SEO Cost Calculator (${l.websiteType || 'SEO'})`,
+        budget: l.estimatedBudget || l.budget || '₹8,000/mo',
+        message: l.message && l.message.includes('City:') ? l.message : `City: ${l.city || 'N/A'} | Target: ${l.targetLocation || 'N/A'} | Keywords: ${l.keywordTier || 'N/A'} | Tech: ${l.techStack || 'N/A'} | Note: ${l.message || 'None'}`,
+        source: l.source || 'SEO Calculator',
+        status: l.status || 'New',
+        createdAt: l.createdAt || new Date().toISOString()
+      }));
+
       const res = await adminService.getLeads();
-      if (res.success) setLeads(res.leads);
-    } catch {} finally { setLoading(false); }
+      if (res.success && Array.isArray(res.leads)) {
+        const map = new Map<string, LeadItem>();
+        [...localLeads, ...res.leads].forEach(item => map.set(item.id, item));
+        setLeads(Array.from(map.values()));
+      } else {
+        setLeads(localLeads);
+      }
+    } catch {
+      setLeads([]);
+    } finally { setLoading(false); }
   };
-  useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const filtered = useMemo(() => leads.filter(l => {
     const s = !search || `${l.fullName} ${l.email} ${l.phone} ${l.serviceRequired} ${l.message}`.toLowerCase().includes(search.toLowerCase());
