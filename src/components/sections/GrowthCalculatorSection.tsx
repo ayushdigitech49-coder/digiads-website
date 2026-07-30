@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Calculator,
@@ -8,9 +8,15 @@ import {
   ArrowRight,
   Sliders,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Check,
+  Award
 } from 'lucide-react';
 import { useModal } from '../../context/ModalContext';
+import { pricingPlans } from '../../data/pricingData';
+import type { PricingPlan } from '../../types';
+import { adminService } from '../../services/admin.service';
+import { subscribeCmsUpdate } from '../../utils/broadcastSync';
 
 const INDUSTRIES = [
   { id: 'real_estate', label: 'Real Estate', multiplier: 2.5, avgRoas: 4.5 },
@@ -26,11 +32,59 @@ const INDUSTRIES = [
 export const GrowthCalculatorSection: React.FC = () => {
   const { openAuditModal } = useModal();
 
+  // Dynamic Pricing Plans from CMS
+  const [plans, setPlans] = useState<PricingPlan[]>(() => {
+    const saved = localStorage.getItem('sumit_pricing_plans');
+    if (saved) {
+      try { return JSON.parse(saved); } catch {}
+    }
+    return pricingPlans;
+  });
+
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('growth-seo');
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await adminService.getPricingPlans();
+        if (res && res.success && Array.isArray(res.pricingPlans) && res.pricingPlans.length > 0) {
+          setPlans(res.pricingPlans);
+          localStorage.setItem('sumit_pricing_plans', JSON.stringify(res.pricingPlans));
+        }
+      } catch {}
+    };
+
+    fetchPlans();
+    const unsubscribe = subscribeCmsUpdate((type) => {
+      if (type === 'pricing' || type === 'all') {
+        fetchPlans();
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Selected Plan Object
+  const currentPlan = useMemo(() => {
+    return plans.find(p => p.id === selectedPlanId);
+  }, [plans, selectedPlanId]);
+
   // Inputs
-  const [budget, setBudget] = useState<number>(100000);
+  const [budget, setBudget] = useState<number>(8000);
   const [currentLeads, setCurrentLeads] = useState<number>(50);
   const [selectedIndustry, setSelectedIndustry] = useState<string>('ecommerce');
   const [conversionRate, setConversionRate] = useState<number>(3.0);
+
+  // Sync budget when package changes
+  const handlePlanSelect = (planId: string) => {
+    setSelectedPlanId(planId);
+    if (planId !== 'custom') {
+      const plan = plans.find(p => p.id === planId);
+      if (plan && plan.priceMonthly) {
+        setBudget(plan.priceMonthly);
+      }
+    }
+  };
 
   const [hasCalculated, setHasCalculated] = useState<boolean>(true);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
@@ -134,31 +188,89 @@ export const GrowthCalculatorSection: React.FC = () => {
             </div>
 
             <form onSubmit={handleCalculate} className="space-y-5">
+
+              {/* 1. SELECT GROWTH PACKAGE / CATEGORY */}
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-2">
+                  1. Select SEO Growth Package / Retainer
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {plans.slice(0, 3).map(p => {
+                    const isSelected = selectedPlanId === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => handlePlanSelect(p.id)}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-blue-50/90 border-[#1352D0] ring-2 ring-[#1352D0]/20 shadow-sm'
+                            : 'bg-slate-50 border-slate-200 hover:bg-slate-100/80'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-extrabold ${isSelected ? 'text-[#1352D0]' : 'text-slate-900'}`}>
+                            {p.name}
+                          </span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#1352D0] shrink-0" />}
+                        </div>
+                        <div className="text-sm font-black text-slate-900 mt-1">
+                          ₹{p.priceMonthly.toLocaleString('en-IN')}<span className="text-[10px] font-semibold text-slate-500">/mo</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Package Features Preview Checklist */}
+              {currentPlan && (
+                <div className="p-3.5 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-2">
+                  <div className="flex items-center space-x-1.5 text-xs font-black text-[#1352D0] uppercase tracking-wider">
+                    <Award className="w-3.5 h-3.5 text-[#1352D0]" />
+                    <span>Included in {currentPlan.name}:</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                    {currentPlan.features.map((feat, idx) => (
+                      <div key={idx} className="flex items-start space-x-1.5 text-[11px] font-bold text-slate-700">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
-              {/* 1. Monthly Marketing Budget */}
+              {/* 2. Monthly Marketing Budget */}
               <div>
                 <div className="flex justify-between text-xs font-black uppercase tracking-wider mb-2">
-                  <label htmlFor="calc-budget" className="text-slate-700">1. Monthly Marketing Budget (₹)</label>
+                  <label htmlFor="calc-budget" className="text-slate-700">2. Monthly Marketing Budget (₹)</label>
                   <span className="text-[#1352D0] font-extrabold">₹{budget.toLocaleString('en-IN')}</span>
                 </div>
                 <input
                   id="calc-budget"
                   type="number"
-                  min={10000}
-                  step={5000}
+                  min={5000}
+                  step={1000}
                   value={budget}
-                  onChange={e => setBudget(Number(e.target.value))}
+                  onChange={e => {
+                    setBudget(Number(e.target.value));
+                    setSelectedPlanId('custom');
+                  }}
                   placeholder="Enter monthly marketing budget"
                   className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
                 />
                 <input
                   type="range"
                   aria-label="Monthly Marketing Budget Range Slider"
-                  min={20000}
-                  max={2000000}
-                  step={10000}
+                  min={5000}
+                  max={200000}
+                  step={1000}
                   value={budget}
-                  onChange={e => setBudget(Number(e.target.value))}
+                  onChange={e => {
+                    setBudget(Number(e.target.value));
+                    setSelectedPlanId('custom');
+                  }}
                   className="w-full mt-2 accent-[#1352D0] cursor-pointer"
                 />
               </div>

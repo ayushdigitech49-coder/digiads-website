@@ -4,6 +4,8 @@ export interface ContactFaqItem {
 }
 
 export interface ContactConfigData {
+  city: string;
+  availableCities: string;
   heroBadge: string;
   heroTitleLine1: string;
   heroTitleHighlight: string;
@@ -24,6 +26,8 @@ export interface ContactConfigData {
 }
 
 export const defaultContactData: ContactConfigData = {
+  city: 'Jaipur, Rajasthan, India',
+  availableCities: 'Jaipur, Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad, Hyderabad',
   heroBadge: 'Connect With Senior Strategists',
   heroTitleLine1: 'Let’s Build Your Next',
   heroTitleHighlight: '10× Revenue Engine',

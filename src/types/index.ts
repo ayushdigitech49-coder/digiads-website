@@ -84,6 +84,8 @@ export interface BlogPost {
   metaDescription?: string;
   metaKeywords?: string;
   metaSlug?: string;
+  metaRobots?: string;
+  canonicalUrl?: string;
   customScript?: string;
   charts?: {
     type: string;

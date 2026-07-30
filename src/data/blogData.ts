@@ -12,7 +12,7 @@ export const blogPosts: BlogPost[] = [
       role: 'Head of Performance Marketing',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
     },
-    category: 'Perf Marketing',
+    category: 'Performance Marketing',
     publishedAt: 'July 28, 2026',
     readTime: '8 min read',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',

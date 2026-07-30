@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, ChevronDown, FileText } from 'lucide-react';
+import { Calendar, ChevronDown, FileText, Clock, User, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useModal } from '../context/ModalContext';
 import type { BlogPost } from '../types';
@@ -29,7 +29,7 @@ export const BlogPostPage: React.FC = () => {
       p.metaSlug === decodedSlug
   ) || posts[0];
 
-  /* Meta tags update */
+  /* Meta tags, Robots & Canonical URL update */
   useEffect(() => {
     if (post) {
       document.title = post.metaTitle || post.title;
@@ -44,6 +44,17 @@ export const BlogPostPage: React.FC = () => {
       };
       upsertMeta('description', post.metaDescription || post.excerpt);
       upsertMeta('keywords', post.metaKeywords || (post.tags || []).join(', '));
+      upsertMeta('robots', post.metaRobots || 'index, follow, max-image-preview:large, max-snippet:-1');
+
+      // Canonical URL tag injection
+      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+      }
+      const canonicalHref = post.canonicalUrl || `${window.location.origin}/blog/${post.metaSlug || post.slug}`;
+      canonical.setAttribute('href', canonicalHref);
     }
   }, [post]);
 
@@ -61,24 +72,26 @@ export const BlogPostPage: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* Categories with post counts */
+  const normalizeCategory = (cat?: string) => {
+    if (!cat) return 'Digital Marketing';
+    if (cat === 'Perf Marketing') return 'Performance Marketing';
+    if (cat === 'Web Dev') return 'Web Development';
+    return cat;
+  };
+
+  /* Dynamic Categories with actual post counts (Capped to max 10) */
   const categoryCounts = useMemo(() => {
     const map = new Map<string, number>();
-    const defaults = [
-      'Website Design',
-      'Digital Marketing',
-      'Content Writing',
-      'SEO Service',
-      'Social Media Marketing',
-    ];
-    defaults.forEach((c) => map.set(c, 0));
 
     posts.forEach((p) => {
-      const cat = p.category || 'Digital Marketing';
+      const cat = normalizeCategory(p.category);
       map.set(cat, (map.get(cat) || 0) + 1);
     });
 
-    return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
+    return Array.from(map.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
   }, [posts]);
 
   /* Recent Posts list */
@@ -134,7 +147,7 @@ export const BlogPostPage: React.FC = () => {
             </Link>
             <span className="text-slate-400">&gt;</span>
             <span className="text-slate-100 font-extrabold truncate max-w-md">
-              {post.title}
+              {post.category || 'Digital Marketing'}
             </span>
           </nav>
         </div>
@@ -156,16 +169,43 @@ export const BlogPostPage: React.FC = () => {
               />
             </div>
 
-            {/* PUBLISH DATE METADATA */}
-            <div className="flex items-center space-x-2 text-xs font-bold text-slate-500 pt-1">
-              <Calendar className="w-4 h-4 text-slate-400" />
-              <span>{post.publishedAt || '16 Feb, 2024'}</span>
-            </div>
-
             {/* MAIN BLOG TITLE */}
             <h2 className="text-2xl sm:text-3xl font-black text-[#1D2B53] leading-snug tracking-tight">
               {post.title}
             </h2>
+
+            {/* AUTHOR INFO & DESIGNATION BADGE CARD (Positioned before article reading) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/80 via-slate-50 to-slate-100/70 border border-blue-100/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 my-4 shadow-xs">
+              <div className="flex items-center space-x-3.5">
+                <img
+                  src={post.author?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'}
+                  alt={post.author?.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#1352D0]/40 shadow-xs shrink-0"
+                />
+                <div>
+                  <div className="text-sm font-black text-slate-900 flex items-center space-x-2">
+                    <span>{post.author?.name || 'Sumit Sharma'}</span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#1352D0] text-white text-[10px] font-extrabold uppercase tracking-wider">
+                      {post.category || 'SEO Strategy'}
+                    </span>
+                  </div>
+                  <div className="text-xs font-bold text-[#1352D0] mt-0.5">
+                    {post.author?.role || 'Founder & Chief Growth Officer'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4 text-xs font-bold text-slate-600 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/80">
+                <div className="flex items-center space-x-1.5">
+                  <Calendar className="w-4 h-4 text-[#1352D0]" />
+                  <span>{post.publishedAt || 'July 28, 2026'}</span>
+                </div>
+                <div className="flex items-center space-x-1.5">
+                  <Clock className="w-4 h-4 text-emerald-600" />
+                  <span>{post.readTime || '6 min read'}</span>
+                </div>
+              </div>
+            </div>
 
             {/* BLOG ARTICLE CONTENT BODY */}
             <div

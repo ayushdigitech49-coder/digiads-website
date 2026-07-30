@@ -21,6 +21,63 @@ import { useModal } from '../../context/ModalContext';
 import { adminService } from '../../services/admin.service';
 import { subscribeCmsUpdate } from '../../utils/broadcastSync';
 
+const defaultMegaMenuColumns = [
+  {
+    id: 'col_digital_marketing',
+    title: 'DIGITAL MARKETING',
+    color: '#D91212',
+    items: [
+      { id: 'm1_1', title: 'Search Engine Optimization', path: '/services/seo-services', iconType: 'Search', iconBg: 'bg-blue-500/10 text-[#1352D0]' },
+      { id: 'm1_2', title: 'Meta Ads Management', path: '/services/performance-marketing', iconType: 'text', textBadge: '∞', iconBg: 'bg-blue-500/10 text-blue-600' },
+      { id: 'm1_3', title: 'Google Ads Management', path: '/services/performance-marketing', iconType: 'Globe', iconBg: 'bg-blue-500/10 text-blue-600' },
+      { id: 'm1_4', title: 'Performance Marketing', path: '/services/performance-marketing', iconType: 'TrendingUp', iconBg: 'bg-red-500/10 text-[#D91212]' },
+      { id: 'm1_5', title: 'Social Media Optimization', path: '/services/social-media-marketing', iconType: 'Smartphone', iconBg: 'bg-purple-500/10 text-purple-600' },
+      { id: 'm1_6', title: 'Graphic Design', path: '/services/branding-and-design', iconType: 'Palette', iconBg: 'bg-pink-500/10 text-pink-600' },
+    ]
+  },
+  {
+    id: 'col_web_development',
+    title: 'WEB DEVELOPMENT',
+    color: '#D91212',
+    items: [
+      { id: 'm2_1', title: 'WordPress Development', path: '/services/web-development', iconType: 'badge', textBadge: 'W', iconBg: 'bg-blue-600 text-white' },
+      { id: 'm2_2', title: 'Shopify Development', path: '/services/web-development', iconType: 'badge', textBadge: 'S', iconBg: 'bg-emerald-600 text-white' },
+      { id: 'm2_3', title: 'WooCommerce Development', path: '/services/web-development', iconType: 'badge', textBadge: 'woo', iconBg: 'bg-purple-600 text-white' },
+      { id: 'm2_4', title: 'Custom Web Development', path: '/services/web-development', iconType: 'Code2', iconBg: 'bg-blue-500/10 text-[#1352D0]' },
+      { id: 'm2_5', title: 'Website Maintenance', path: '/services/web-development', iconType: 'Wrench', iconBg: 'bg-slate-100 text-slate-700' },
+      { id: 'm2_6', title: 'Web Design', path: '/services/branding-and-design', iconType: 'Monitor', iconBg: 'bg-blue-500/10 text-[#1352D0]' },
+    ]
+  },
+  {
+    id: 'col_marketplace_management',
+    title: 'MARKETPLACE MANAGEMENT',
+    color: '#D91212',
+    items: [
+      { id: 'm3_1', title: 'Amazon Account Management', path: '/services/seo-services', iconType: 'badge', textBadge: 'a', iconBg: 'bg-amber-500/10 text-amber-600' },
+      { id: 'm3_2', title: 'Flipkart Account Management', path: '/services/seo-services', iconType: 'badge', textBadge: 'fk', iconBg: 'bg-blue-500/10 text-blue-600' },
+      { id: 'm3_3', title: 'Meesho Account Management', path: '/services/seo-services', iconType: 'badge', textBadge: 'm', iconBg: 'bg-pink-500/10 text-pink-600' },
+      { id: 'm3_4', title: 'Shopify Account Management', path: '/services/web-development', iconType: 'badge', textBadge: 's', iconBg: 'bg-emerald-500/10 text-emerald-600' },
+      { id: 'm3_5', title: 'Myntra Account Management', path: '/services/seo-services', iconType: 'badge', textBadge: 'M', iconBg: 'bg-purple-500/10 text-purple-600' },
+      { id: 'm3_6', title: 'Amazon Product Listing', path: '/services/seo-services', iconType: 'Package', iconBg: 'bg-amber-500/10 text-amber-600' },
+      { id: 'm3_7', title: 'Ecommerce Product Upload Listing', path: '/services/seo-services', iconType: 'ShoppingBag', iconBg: 'bg-slate-100 text-slate-700' },
+    ]
+  },
+  {
+    id: 'col_marketplace_onboarding',
+    title: 'MARKETPLACE ONBOARDING SERVICES',
+    color: '#D91212',
+    items: [
+      { id: 'm4_1', title: 'Blinkit Account Management & Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'b', iconBg: 'bg-yellow-400 text-slate-950' },
+      { id: 'm4_2', title: 'Swiggy Instamart Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'si', iconBg: 'bg-orange-500 text-white' },
+      { id: 'm4_3', title: 'Zepto Seller Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'Z', iconBg: 'bg-purple-600 text-white' },
+      { id: 'm4_4', title: 'Ajio Seller Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'A', iconBg: 'bg-slate-900 text-white' },
+      { id: 'm4_5', title: 'Tata Cliq Seller Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'tc', iconBg: 'bg-red-600 text-white' },
+      { id: 'm4_6', title: 'Nykaa Seller Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'N', iconBg: 'bg-pink-500 text-white' },
+      { id: 'm4_7', title: 'Myntra Seller Onboarding', path: '/services/seo-services', iconType: 'badge', textBadge: 'M', iconBg: 'bg-purple-500/10 text-purple-600' },
+    ]
+  }
+];
+
 export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { openAuditModal, openConsultationModal } = useModal();
   const [columns, setColumns] = useState<any[]>([]);
@@ -40,8 +97,15 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
       const saved = localStorage.getItem('sumit_mega_menu_config');
       if (saved) {
-        try { setColumns(JSON.parse(saved)); } catch {}
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setColumns(parsed);
+            return;
+          }
+        } catch {}
       }
+      setColumns(defaultMegaMenuColumns);
     };
 
     fetchMegaMenu();
@@ -54,6 +118,8 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
     return () => unsubscribe();
   }, []);
+
+  const displayColumns = columns.length > 0 ? columns : defaultMegaMenuColumns;
 
   const renderIcon = (item: any) => {
     if (item.imageUrl) {
@@ -152,7 +218,7 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
 
       {/* 4-COLUMN DYNAMIC GRID MATCHING EXACT DASHBOARD CMS DATA & PRESERVING FULL BEAUTIFUL UI */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-6 border-b border-slate-100 relative z-10">
-        {columns.map((col) => (
+        {displayColumns.map((col) => (
           <div key={col.id} className="space-y-3">
             <div className="pb-2 border-b border-slate-100">
               <h4 style={{ color: col.color || '#D91212' }} className="text-xs sm:text-sm font-black uppercase tracking-wider">

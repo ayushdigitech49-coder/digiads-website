@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Phone, Mail, MapPin, Sparkles, CheckCircle2, MessageCircle, FileText } from 'lucide-react';
+import { Save, Plus, Trash2, Phone, Mail, MapPin, Sparkles, CheckCircle2, MessageCircle, FileText, Building2 } from 'lucide-react';
 import { adminService } from '../../services/admin.service';
 import { defaultContactData, type ContactConfigData, type ContactFaqItem } from '../../data/contactData';
 import { notifyCmsUpdate } from '../../utils/broadcastSync';
@@ -212,6 +212,42 @@ export const AdminContactPage: React.FC = () => {
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-medium text-slate-900 bg-white"
               />
             </div>
+          </div>
+
+          {/* Footer City & Service Cities CMS Fields */}
+          <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-4 md:col-span-2">
+            <div className="flex items-center space-x-2 text-xs font-black uppercase text-[#1352D0]">
+              <Building2 className="w-4 h-4" />
+              <span>Footer City & Service Cities CMS Control</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Headquarter City (Top Footer Card)</label>
+                <input
+                  type="text"
+                  value={config.city || 'Jaipur, Rajasthan, India'}
+                  onChange={e => setConfig({ ...config, city: e.target.value })}
+                  placeholder="e.g. Jaipur, Rajasthan, India"
+                  className="w-full px-4 py-2.5 rounded-xl border border-blue-300 font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1352D0]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Services Available In These Cities (Footer Locations List)</label>
+                <input
+                  type="text"
+                  value={config.availableCities || 'Jaipur, Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad'}
+                  onChange={e => setConfig({ ...config, availableCities: e.target.value })}
+                  placeholder="e.g. Jaipur, Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad"
+                  className="w-full px-4 py-2.5 rounded-xl border border-blue-300 font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1352D0]"
+                />
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-500 font-semibold">
+              These fields replace the old static street address & long paragraph in the website Footer with a clean list of service cities.
+            </p>
           </div>
 
         </div>

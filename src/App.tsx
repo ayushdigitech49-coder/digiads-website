@@ -13,6 +13,7 @@ import { BookConsultationModal } from './components/forms/BookConsultationModal'
 import { AdminLayout } from './components/admin/AdminLayout';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AnnouncementBar } from './components/common/AnnouncementBar';
+import { GlobalSeoUpdater } from './components/common/GlobalSeoUpdater';
 
 import { HomePage } from './pages/HomePage';
 
@@ -153,6 +154,7 @@ const AppContent: React.FC = () => {
             <Route path="/admin/media" element={<AdminShell><AdminMediaPage /></AdminShell>} />
             <Route path="/admin/about" element={<AdminShell><AdminAboutPage /></AdminShell>} />
             <Route path="/admin/contact" element={<AdminShell><AdminContactPage /></AdminShell>} />
+            <Route path="/admin/footer" element={<AdminShell><AdminContactPage /></AdminShell>} />
             <Route path="/admin/faq" element={<AdminShell><AdminFaqPage /></AdminShell>} />
             <Route path="/admin/industries" element={<AdminShell><AdminIndustriesPage /></AdminShell>} />
             <Route path="/admin/navbar" element={<AdminShell><AdminNavbarPage /></AdminShell>} />
@@ -181,6 +183,7 @@ export const App: React.FC = () => {
           <Preloader />
           <Router>
             <ScrollToTop />
+            <GlobalSeoUpdater />
             <ScrollProgressBar />
             <AppContent />
           </Router>

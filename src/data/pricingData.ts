@@ -7,47 +7,64 @@ export interface PricingFaq {
 
 export const pricingPlans: PricingPlan[] = [
   {
-    id: 'micro-launch',
-    name: 'Micro Launch',
-    priceMonthly: 14999,
-    priceAnnual: 11999,
-    description: 'Bootstrap-friendly package for solopreneurs, local shops, and personal brands validating their digital presence.',
+    id: 'starter-seo',
+    name: 'Starter Package',
+    priceMonthly: 5000,
+    priceAnnual: 4000,
+    description: 'On-Page + Off-Page SEO booster designed for WordPress & HTML websites.',
     features: [
-      'Basic SEO Setup & 8 Target Keywords',
-      'Google My Business Optimization & Posts',
-      'Meta Ad Management (up to ₹30K ad spend)',
-      'Website Performance Audit & Quick Fixes',
-      '4 Monthly Custom Social Media Posts',
-      'Bi-Weekly Check-ins & Monthly Report'
+      'On-Page + Off-Page SEO',
+      '5–15 Location Keywords',
+      '200 High-Quality Backlinks (30+ DA)',
+      '10 Do-Follow Guest Posts',
+      '4 Blog Posts',
+      'For WordPress & HTML Websites'
     ],
-    ctaText: 'Start Micro Launch',
-    highlight: 'Perfect for Solopreneurs & Local Shops'
+    ctaText: 'Choose Starter Package',
+    highlight: 'Best for Local Businesses & Small Sites'
   },
   {
-    id: 'starter-growth',
-    name: 'Starter Growth',
-    priceMonthly: 29999,
-    priceAnnual: 23999,
-    description: 'Ideal for local businesses and early-stage startups seeking consistent leads and top search rankings.',
+    id: 'growth-seo',
+    name: 'Growth Package',
+    priceMonthly: 8000,
+    priceAnnual: 6400,
+    popular: true,
+    description: 'Complete On-Page + Off-Page + Technical SEO with guaranteed indexing.',
     features: [
-      'Core SEO Setup & 15 Target Keywords',
-      'Google My Business Local Domination',
-      'Meta (FB/IG) Ad Management (up to ₹1L spend)',
-      'Basic Website Performance Audit & Speed Fixes',
-      '8 Monthly Custom Social Media Posts',
-      '2 Short Video Reels with Basic Editing',
-      'Monthly ROI & Growth Report',
-      'Dedicated Account Manager'
+      'On-Page + Off-Page + Technical SEO',
+      '10–20 Keywords',
+      '300 Backlinks (30+ DA) (30-40% Indexing) Guaranteed',
+      '20 Guest Posts',
+      '20 Competitor Backlinks',
+      '4 Blog Posts'
     ],
-    ctaText: 'Start Growing',
-    highlight: 'Ideal for Local & Regional Brands'
+    ctaText: 'Choose Growth Package',
+    highlight: 'Most Popular — Guaranteed Indexing'
+  },
+  {
+    id: 'advanced-seo',
+    name: 'Advanced SEO Package',
+    priceMonthly: 10000,
+    priceAnnual: 8000,
+    description: 'Full technical SEO, website speed optimization, content creation & 400 backlinks.',
+    features: [
+      'On-Page + Off-Page + Technical SEO',
+      'Website Maintenance & Page Speed',
+      '15–30 Keywords',
+      '400 Backlinks (30-40% Indexing) Guaranteed',
+      '40 Guest Posts',
+      '8 Blog Posts On Website',
+      '6 Webpage Content',
+      'From 2nd month only ₹10,000/Month'
+    ],
+    ctaText: 'Choose Advanced Package',
+    highlight: 'Enterprise Scaling & Full Web Support'
   },
   {
     id: 'scale-accelerator',
     name: 'Scale Accelerator',
     priceMonthly: 59999,
     priceAnnual: 47999,
-    popular: true,
     description: 'Our flagship unified growth package combining SEO, high-ROAS Performance Ads, and custom landing page optimization.',
     features: [
       'Advanced Technical & E-Commerce SEO (50 Keywords)',
@@ -61,27 +78,7 @@ export const pricingPlans: PricingPlan[] = [
       'Weekly Growth Sprints & Reports'
     ],
     ctaText: 'Scale My Business',
-    highlight: 'Most Popular Choice for Scaling Brands'
-  },
-  {
-    id: 'enterprise-orbit',
-    name: 'Enterprise Orbit',
-    priceMonthly: 119999,
-    priceAnnual: 95999,
-    description: 'Custom full-stack digital marketing squad, headless web app build, AI chatbot integration, and aggressive market conquest.',
-    features: [
-      'Unlimited Enterprise SEO & National Rank Conquest',
-      'Performance Marketing Squad (Google, Meta, YouTube, LinkedIn)',
-      'Full Custom Website/App Rebuild (React/Next.js/Shopify)',
-      'Custom AI Voice/WhatsApp Chatbot & CRM Integration',
-      'Dedicated Creative Studio (Shoots, Motion FX, 3D Assets)',
-      'Bi-Weekly Executive Strategy & CRO Sprints',
-      'Unlimited Landing Pages & A/B Experiments',
-      'DR 80+ PR & Media Feature Placements',
-      '24/7 Priority VIP Growth Support'
-    ],
-    ctaText: 'Book Enterprise Consultation',
-    highlight: 'Full-Stack Dedicated Agency Squad'
+    highlight: 'Full-Stack Performance Ads & Web Engineering'
   }
 ];
 
@@ -91,8 +88,8 @@ export const pricingFaqs: PricingFaq[] = [
     answer: 'No hidden fees whatsoever! All our growth plans run on flexible monthly SLA agreements. You can upgrade, downgrade, or pause with 30 days notice.'
   },
   {
-    question: 'How does the ad spend management work?',
-    answer: 'Ad spend is billed directly to your Meta or Google billing profile for 100% transparency. Our monthly fee covers full funnel creative design, copywriting, tracking, and campaign optimization.'
+    question: 'How does guaranteed indexing for backlinks work?',
+    answer: 'Our Growth and Advanced packages use premium indexing services ensuring 30-40% guaranteed indexing on Google Search Console within 30 days.'
   },
   {
     question: 'Can we customize a package for our unique business requirements?',

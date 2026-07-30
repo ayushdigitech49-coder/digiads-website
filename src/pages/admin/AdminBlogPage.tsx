@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen, Search, Plus, Edit2, Trash2, Filter, X, Check,
   Sparkles, Clock, User as UserIcon, Layers, HelpCircle, Tag, Eye,
-  Globe, Code, FileText
+  Globe, Code, FileText, Type
 } from 'lucide-react';
 import { Editor } from '@tinymce/tinymce-react';
 import type { BlogPost } from '../../types';
@@ -11,8 +11,8 @@ import { getStoredBlogPosts, saveStoredBlogPosts, subscribeBlogUpdates } from '.
 
 const categoryColor: Record<string, string> = {
   'SEO Strategy': 'bg-emerald-50 text-emerald-700 border-emerald-200 border',
-  'Perf Marketing': 'bg-blue-50 text-blue-700 border-blue-200 border',
-  'Web Dev': 'bg-sky-50 text-sky-700 border-sky-200 border',
+  'Performance Marketing': 'bg-blue-50 text-blue-700 border-blue-200 border',
+  'Web Development': 'bg-sky-50 text-sky-700 border-sky-200 border',
   'Social Media': 'bg-pink-50 text-pink-700 border-pink-200 border',
   'Branding': 'bg-purple-50 text-purple-700 border-purple-200 border',
   'AI Marketing': 'bg-amber-50 text-amber-700 border-amber-200 border',
@@ -20,6 +20,7 @@ const categoryColor: Record<string, string> = {
 };
 
 export const AdminBlogPage: React.FC = () => {
+  const editorRef = React.useRef<any>(null);
   const [items, setItems] = useState<BlogPost[]>(() => getStoredBlogPosts());
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('All');
@@ -63,6 +64,12 @@ export const AdminBlogPage: React.FC = () => {
       setItems(updatedPosts);
     });
   }, []);
+
+  const availablePresets = useMemo(() => {
+    const defaults = ['Performance Marketing', 'SEO Strategy', 'Web Development', 'Social Media', 'AI Marketing', 'Branding', 'Content Writing', 'Digital Marketing', 'Website Design', 'E-commerce Growth'];
+    const fromPosts = items.map(i => i.category).filter(Boolean);
+    return Array.from(new Set([...defaults, ...fromPosts]));
+  }, [items]);
 
   const cats = useMemo(() => ['All', ...Array.from(new Set(items.map(i => i.category)))], [items]);
   const catCls = (c: string) => categoryColor[c] || 'bg-slate-100 text-slate-700 border-slate-200 border';
@@ -472,18 +479,62 @@ export const AdminBlogPage: React.FC = () => {
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-1">
                           <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Category *</label>
-                          <select
-                            value={form.category}
-                            onChange={e => setForm({ ...form, category: e.target.value })}
-                            className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none appearance-none"
-                          >
-                            {['SEO Strategy', 'Perf Marketing', 'Web Dev', 'Social Media', 'Branding', 'AI Marketing', 'Content Marketing'].map(c => (
-                              <option key={c} value={c}>{c}</option>
-                            ))}
-                          </select>
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              required
+                              value={form.category || ''}
+                              onChange={e => setForm({ ...form, category: e.target.value })}
+                              placeholder="e.g. Performance Marketing, SEO Strategy"
+                              className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                            />
+                            <div className="flex items-center space-x-1.5 flex-wrap gap-y-1.5 text-[11px] font-bold text-slate-500">
+                              <span className="text-slate-400 font-semibold">Quick Presets:</span>
+                              {availablePresets.map(c => (
+                                <button
+                                  key={c}
+                                  type="button"
+                                  onClick={() => setForm({ ...form, category: c })}
+                                  className={`px-2.5 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                    form.category === c ? 'bg-purple-700 text-white border-purple-700 shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                                  }`}
+                                >
+                                  {c}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                            Publish Date 📅
+                          </label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={form.publishedAt || ''}
+                              onChange={e => setForm({ ...form, publishedAt: e.target.value })}
+                              placeholder="e.g. July 30, 2026"
+                              className="flex-1 px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                            />
+                            <input
+                              type="date"
+                              onChange={e => {
+                                if (e.target.value) {
+                                  const d = new Date(e.target.value);
+                                  const formatted = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                                  setForm({ ...form, publishedAt: formatted });
+                                }
+                              }}
+                              className="px-3 py-3 rounded-2xl bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 focus:bg-white focus:outline-none cursor-pointer"
+                              title="Select Date from Calendar"
+                            />
+                          </div>
+                          <p className="text-[11px] text-slate-400 mt-1 font-medium">Type manually or pick from calendar</p>
                         </div>
 
                         <div>
@@ -591,6 +642,37 @@ export const AdminBlogPage: React.FC = () => {
                             className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-600 text-sm font-bold text-slate-900 focus:outline-none transition-all"
                           />
                         </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                              Canonical URL (rel="canonical")
+                            </label>
+                            <input
+                              value={form.canonicalUrl || ''}
+                              onChange={e => setForm({ ...form, canonicalUrl: e.target.value })}
+                              placeholder="https://sumitdigitech.com/blog/your-slug"
+                              className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-600 text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                            />
+                            <p className="text-[11px] text-slate-400 mt-1 font-medium">Master URL to avoid duplicate penalty. Auto-generated if left blank.</p>
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
+                              Robots Meta Tag (Crawling Instructions)
+                            </label>
+                            <select
+                              value={form.metaRobots || 'index, follow, max-image-preview:large, max-snippet:-1'}
+                              onChange={e => setForm({ ...form, metaRobots: e.target.value })}
+                              className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-emerald-600 text-sm font-bold text-slate-900 focus:outline-none transition-all appearance-none cursor-pointer"
+                            >
+                              <option value="index, follow, max-image-preview:large, max-snippet:-1">index, follow (Default — Index & Follow links)</option>
+                              <option value="noindex, follow">noindex, follow (Hide from Google, follow links)</option>
+                              <option value="index, nofollow">index, nofollow (Index on Google, don't follow links)</option>
+                              <option value="noindex, nofollow">noindex, nofollow (Completely hide from search engines)</option>
+                            </select>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -632,34 +714,88 @@ export const AdminBlogPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* SECTION 4: TINYMCE RICH TEXT EDITOR */}
+                    {/* SECTION 4: TINYMCE RICH TEXT EDITOR WITH H1-H6 QUICK HEADING TOOLBAR */}
                     <div className="space-y-4 pt-2">
                       <div className="flex items-center justify-between border-b border-purple-100 pb-2">
                         <h4 className="text-xs font-black uppercase tracking-wider text-purple-700 flex items-center space-x-2">
                           <Sparkles className="w-4 h-4 text-amber-500" />
-                          <span>4. Article Body (TinyMCE Rich Text Editor)</span>
+                          <span>4. Article Body (TinyMCE Rich Text Editor & Heading Controls)</span>
                         </h4>
-                        <span className="text-[10px] font-black uppercase text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg">TinyMCE Enabled</span>
+                        <span className="text-[10px] font-black uppercase text-white bg-[#1352D0] px-2.5 py-1 rounded-lg">
+                          H1–H6 Headings Enabled
+                        </span>
                       </div>
 
-                      <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                      {/* QUICK HEADING LEVEL SELECTOR TOOLBAR */}
+                      <div className="bg-[#1D2B53] text-white p-3 sm:p-3.5 rounded-t-2xl border border-[#1D2B53] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                        <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                          <span className="text-xs font-black uppercase text-amber-400 mr-1 flex items-center space-x-1">
+                            <Type className="w-3.5 h-3.5" />
+                            <span>Heading Level:</span>
+                          </span>
+                          {['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].map((hTag) => (
+                            <button
+                              key={hTag}
+                              type="button"
+                              onClick={() => {
+                                if (editorRef.current) {
+                                  editorRef.current.execCommand('FormatBlock', false, hTag.toLowerCase());
+                                }
+                              }}
+                              className="px-3 py-1 rounded-lg bg-white/10 hover:bg-[#1352D0] hover:text-white border border-white/20 text-white text-xs font-black transition-all cursor-pointer hover:scale-105 active:scale-95 shadow-xs"
+                              title={`Convert selected paragraph to ${hTag}`}
+                            >
+                              {hTag}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (editorRef.current) {
+                                editorRef.current.execCommand('FormatBlock', false, 'p');
+                              }
+                            }}
+                            className="px-3 py-1 rounded-lg bg-white/10 hover:bg-slate-700 border border-white/20 text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                            title="Convert to Paragraph"
+                          >
+                            Paragraph
+                          </button>
+                        </div>
+
+                        <div className="text-[11px] font-medium text-slate-300">
+                          ✨ Select text & click <strong>H1–H6</strong> or use <em>Blocks</em> dropdown below
+                        </div>
+                      </div>
+
+                      {/* TINYMCE EDITOR CONTAINER */}
+                      <div className="border border-slate-200 rounded-b-2xl overflow-hidden shadow-xs border-t-0">
                         <Editor
                           tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"
                           value={form.content || ''}
+                          onInit={(_evt, editor) => { editorRef.current = editor; }}
                           onEditorChange={(newContent) => setForm(prev => ({ ...prev, content: newContent }))}
                           init={{
-                            height: 380,
+                            height: 440,
                             menubar: false,
                             plugins: [
                               'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                               'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
                               'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
                             ],
-                            toolbar: 'undo redo | blocks | ' +
-                              'bold italic forecolor | alignleft aligncenter ' +
+                            block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4; Heading 5=h5; Heading 6=h6; Preformatted=pre; Quote=blockquote',
+                            toolbar: 'undo redo | blocks formatselect | ' +
+                              'bold italic underline strikethrough forecolor backcolor | alignleft aligncenter ' +
                               'alignright alignjustify | bullist numlist outdent indent | ' +
-                              'removeformat | link image table | code help',
-                            content_style: 'body { font-family: Inter, Helvetica, Arial, sans-serif; font-size: 14px; color: #1e293b; line-height: 1.6; }',
+                              'removeformat | link image table | code fullscreen help',
+                            content_style: `
+                              body { font-family: Inter, Helvetica, Arial, sans-serif; font-size: 15px; color: #1e293b; line-height: 1.7; padding: 12px; }
+                              h1 { font-size: 2.25rem; font-weight: 900; color: #1d2b53; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.25; }
+                              h2 { font-size: 1.75rem; font-weight: 800; color: #1352d0; margin-top: 1.25rem; margin-bottom: 0.5rem; line-height: 1.3; }
+                              h3 { font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-top: 1rem; margin-bottom: 0.5rem; }
+                              h4 { font-size: 1.2rem; font-weight: 700; color: #334155; margin-top: 0.85rem; margin-bottom: 0.4rem; }
+                              h5 { font-size: 1.05rem; font-weight: 700; color: #475569; margin-top: 0.75rem; margin-bottom: 0.3rem; }
+                              h6 { font-size: 0.95rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.65rem; margin-bottom: 0.25rem; }
+                            `,
                             branding: false
                           }}
                         />

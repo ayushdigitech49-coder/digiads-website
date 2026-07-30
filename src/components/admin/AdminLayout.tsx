@@ -54,6 +54,7 @@ const sidebarSections = [
     heading: 'OPERATIONS & CMS',
     items: [
       { path: '/admin/leads', label: 'Lead Inbox', icon: Inbox, badge: null, color: 'text-[#D91212]' },
+      { path: '/admin/contact', label: 'Footer & Contact CMS', icon: PhoneCall, badge: null, color: 'text-red-600' },
       { path: '/admin/media', label: 'Media Press CMS', icon: Award, badge: null, color: 'text-amber-500' },
       { path: '/admin/announcement-bar', label: 'Announcement Bar', icon: Megaphone, badge: null, color: 'text-amber-500' },
       { path: '/admin/hero', label: 'Hero Content CMS', icon: Layout, badge: null, color: 'text-[#1352D0]' },
