@@ -225,10 +225,7 @@ export const GrowthCalculatorSection: React.FC = () => {
         
         {/* SECTION HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#1352D0]/20 border border-[#1352D0]/40 text-[#4D8BFF] text-xs font-black tracking-widest uppercase shadow-xs">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Instant SEO Cost Estimator & Tech Detector</span>
-          </div>
+    
 
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug">
             Get your Affordable approx. <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">SEO Cost Quickly</span> within 1 Min in your Email
