@@ -78,9 +78,15 @@ const defaultMegaMenuColumns = [
   }
 ];
 
-export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { openAuditModal, openConsultationModal } = useModal();
-  const [columns, setColumns] = useState<any[]>([]);
+interface MegaDropdownProps {
+  onClose: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}
+
+export const MegaDropdown: React.FC<MegaDropdownProps> = ({ onClose, onMouseEnter, onMouseLeave }) => {
+  const { openConsultationModal, openAuditModal } = useModal();
+  const [columns, setColumns] = useState<any[]>(defaultMegaMenuColumns);
 
   useEffect(() => {
     const fetchMegaMenu = async () => {
@@ -115,18 +121,17 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         fetchMegaMenu();
       }
     });
-
     return () => unsubscribe();
   }, []);
 
   const displayColumns = columns.length > 0 ? columns : defaultMegaMenuColumns;
 
   const renderIcon = (item: any) => {
-    if (item.imageUrl) {
+    if (item.customIconUrl) {
       return (
         <img
-          src={item.imageUrl}
-          alt={item.title}
+          src={item.customIconUrl}
+          alt=""
           className="w-7 h-7 rounded-lg object-contain shrink-0 group-hover:scale-110 transition-transform shadow-xs"
         />
       );
@@ -191,8 +196,14 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
         );
       case 'Package':
         return (
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <Package className="w-4 h-4 text-emerald-600" />
+          </div>
+        );
+      case 'Store':
+        return (
           <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <Package className="w-4 h-4 text-amber-600" />
+            <Store className="w-4 h-4 text-amber-600" />
           </div>
         );
       case 'ShoppingBag':
@@ -211,7 +222,12 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
   };
 
   return (
-    <div className="fixed top-16 left-1/2 -translate-x-1/2 w-[94vw] max-w-6xl bg-white rounded-3xl shadow-2xl border border-slate-200 p-7 sm:p-8 animate-in fade-in slide-in-from-top-3 duration-200 text-slate-900 z-50 overflow-hidden font-sans">
+    <div
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className="fixed top-12 sm:top-14 left-1/2 -translate-x-1/2 pt-4 w-[94vw] max-w-6xl z-50 pointer-events-auto"
+    >
+      <div className="w-full bg-white rounded-3xl shadow-2xl border border-slate-200 p-7 sm:p-8 animate-in fade-in slide-in-from-top-3 duration-200 text-slate-900 overflow-hidden font-sans relative">
       
       {/* Background Accent Soft Overlay */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-slate-100/50 via-blue-50/20 to-transparent rounded-bl-full pointer-events-none" />
@@ -290,5 +306,6 @@ export const MegaDropdown: React.FC<{ onClose: () => void }> = ({ onClose }) => 
       </div>
 
     </div>
-  );
+  </div>
+);
 };

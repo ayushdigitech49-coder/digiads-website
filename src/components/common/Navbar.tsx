@@ -102,6 +102,22 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
+  const timeoutRef = React.useRef<any>(null);
+
+  const handleMouseEnterServices = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setServicesDropdownOpen(true);
+  };
+
+  const handleMouseLeaveServices = () => {
+    timeoutRef.current = setTimeout(() => {
+      setServicesDropdownOpen(false);
+    }, 250);
+  };
+
   return (
     <header className={`fixed ${hasAnnouncement ? 'top-8 sm:top-10' : 'top-2 sm:top-3'} left-0 right-0 z-40 px-3 sm:px-4 font-sans transition-all duration-300`}>
       {/* 100% PURE WHITE NAVBAR CONTAINER ACROSS ALL SCREENS */}
@@ -127,8 +143,8 @@ export const Navbar: React.FC = () => {
                 <div
                   key={item.id}
                   className="relative py-2 -my-2"
-                  onMouseEnter={() => setServicesDropdownOpen(true)}
-                  onMouseLeave={() => setServicesDropdownOpen(false)}
+                  onMouseEnter={handleMouseEnterServices}
+                  onMouseLeave={handleMouseLeaveServices}
                 >
                   <Link
                     to="/services"
@@ -141,12 +157,11 @@ export const Navbar: React.FC = () => {
                   </Link>
 
                   {servicesDropdownOpen && (
-                    <div
-                      onMouseEnter={() => setServicesDropdownOpen(true)}
-                      onMouseLeave={() => setServicesDropdownOpen(false)}
-                    >
-                      <MegaDropdown onClose={() => setServicesDropdownOpen(false)} />
-                    </div>
+                    <MegaDropdown
+                      onClose={() => setServicesDropdownOpen(false)}
+                      onMouseEnter={handleMouseEnterServices}
+                      onMouseLeave={handleMouseLeaveServices}
+                    />
                   )}
                 </div>
               );
