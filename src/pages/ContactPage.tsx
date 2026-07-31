@@ -81,12 +81,18 @@ export const ContactPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      alert('Please enter a valid 10-digit mobile number (e.g. 9829012345).');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await contactService.submitLead({
         fullName,
         email,
-        phone,
+        phone: cleanPhone,
         websiteUrl,
         serviceRequired: service,
         monthlyBudget: budget,
@@ -365,8 +371,9 @@ export const ContactPage: React.FC = () => {
                           <label htmlFor="contact-phone" className="block text-xs font-black text-slate-700 mb-1.5">Phone / WhatsApp <span className="text-[#D91212]">*</span></label>
                           <input
                             id="contact-phone"
-                            type="tel" required placeholder="+91 98290 12345"
-                            value={phone} onChange={(e) => setPhone(e.target.value)}
+                            type="tel" required placeholder="10-digit mobile number"
+                            maxLength={10}
+                            value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                             className="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:ring-4 focus:ring-[#D91212]/10 focus:border-[#D91212] text-sm font-bold focus:outline-none transition-all"
                           />
                         </div>

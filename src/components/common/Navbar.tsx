@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, Menu, X, ArrowRight, ShieldCheck, Phone, TrendingUp } from 'lucide-react';
+import { ChevronDown, Menu, X, ArrowRight, ShieldCheck, Phone, TrendingUp, Search } from 'lucide-react';
 import { useModal } from '../../context/ModalContext';
 import { Logo, LogoIcon } from './Logo';
 import { MegaDropdown } from './MegaDropdown';
@@ -184,6 +184,17 @@ export const Navbar: React.FC = () => {
 
         {/* Action Buttons (Desktop) */}
         <div className="hidden lg:flex items-center space-x-2.5 sm:space-x-3 shrink-0">
+          <Link
+            to="/seo-audit"
+            className="relative group px-4 py-2 rounded-full bg-gradient-to-r from-[#1352D0] to-blue-600 hover:from-blue-600 hover:to-indigo-600 text-white font-extrabold text-xs shadow-md shadow-blue-600/25 hover:shadow-lg transition-all flex items-center space-x-1.5 shrink-0"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Free SEO Audit</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[9px] font-black uppercase tracking-wider animate-pulse">
+              FREE
+            </span>
+          </Link>
+
           <Link
             to="/admin/login"
             className="p-2 text-slate-500 hover:text-[#1352D0] transition-colors"

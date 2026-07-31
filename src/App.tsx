@@ -50,6 +50,7 @@ const BlogPage = lazyWithRetry(() => import('./pages/BlogPage'), 'BlogPage');
 const BlogPostPage = lazyWithRetry(() => import('./pages/BlogPostPage'), 'BlogPostPage');
 const ContactPage = lazyWithRetry(() => import('./pages/ContactPage'), 'ContactPage');
 const FreeAuditPage = lazyWithRetry(() => import('./pages/FreeAuditPage'), 'FreeAuditPage');
+const SeoAuditPage = lazyWithRetry(() => import('./pages/SeoAuditPage'), 'SeoAuditPage');
 const OffersPage = lazyWithRetry(() => import('./pages/OffersPage'), 'OffersPage');
 
 // Lazy loaded admin pages
@@ -62,6 +63,7 @@ const AdminCaseStudiesPage = lazyWithRetry(() => import('./pages/admin/AdminCase
 const AdminBlogPage = lazyWithRetry(() => import('./pages/admin/AdminBlogPage'), 'AdminBlogPage');
 const AdminPricingPage = lazyWithRetry(() => import('./pages/admin/AdminPricingPage'), 'AdminPricingPage');
 const AdminLeadsPage = lazyWithRetry(() => import('./pages/admin/AdminLeadsPage'), 'AdminLeadsPage');
+const AdminSeoAuditLeadsPage = lazyWithRetry(() => import('./pages/admin/AdminSeoAuditLeadsPage'), 'AdminSeoAuditLeadsPage');
 const AdminNavbarPage = lazyWithRetry(() => import('./pages/admin/AdminNavbarPage'), 'AdminNavbarPage');
 const AdminAnnouncementBarPage = lazyWithRetry(() => import('./pages/admin/AdminAnnouncementBarPage'), 'AdminAnnouncementBarPage');
 const AdminIndustriesPage = lazyWithRetry(() => import('./pages/admin/AdminIndustriesPage'), 'AdminIndustriesPage');
@@ -70,6 +72,7 @@ const AdminOffersPage = lazyWithRetry(() => import('./pages/admin/AdminOffersPag
 const AdminWhyChooseUsPage = lazyWithRetry(() => import('./pages/admin/AdminWhyChooseUsPage'), 'AdminWhyChooseUsPage');
 const AdminAboutPage = lazyWithRetry(() => import('./pages/admin/AdminAboutPage'), 'AdminAboutPage');
 const AdminContactPage = lazyWithRetry(() => import('./pages/admin/AdminContactPage'), 'AdminContactPage');
+const AdminFooterPage = lazyWithRetry(() => import('./pages/admin/AdminFooterPage'), 'AdminFooterPage');
 const AdminFaqPage = lazyWithRetry(() => import('./pages/admin/AdminFaqPage'), 'AdminFaqPage');
 const AdminSectionsPage = lazyWithRetry(() => import('./pages/admin/AdminSectionsPage'), 'AdminSectionsPage');
 const AdminPermissionsPage = lazyWithRetry(() => import('./pages/admin/AdminPermissionsPage'), 'AdminPermissionsPage');
@@ -136,6 +139,7 @@ const AppContent: React.FC = () => {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/free-audit" element={<FreeAuditPage />} />
+            <Route path="/seo-audit" element={<SeoAuditPage />} />
 
             {/* Admin Auth (no layout guard) */}
             <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -151,10 +155,11 @@ const AppContent: React.FC = () => {
             <Route path="/admin/offers-cms" element={<AdminShell><AdminOffersPage /></AdminShell>} />
             <Route path="/admin/why-choose-us" element={<AdminShell><AdminWhyChooseUsPage /></AdminShell>} />
             <Route path="/admin/leads" element={<AdminShell><AdminLeadsPage /></AdminShell>} />
+            <Route path="/admin/seo-audits" element={<AdminShell><AdminSeoAuditLeadsPage /></AdminShell>} />
             <Route path="/admin/media" element={<AdminShell><AdminMediaPage /></AdminShell>} />
             <Route path="/admin/about" element={<AdminShell><AdminAboutPage /></AdminShell>} />
             <Route path="/admin/contact" element={<AdminShell><AdminContactPage /></AdminShell>} />
-            <Route path="/admin/footer" element={<AdminShell><AdminContactPage /></AdminShell>} />
+            <Route path="/admin/footer" element={<AdminShell><AdminFooterPage /></AdminShell>} />
             <Route path="/admin/faq" element={<AdminShell><AdminFaqPage /></AdminShell>} />
             <Route path="/admin/industries" element={<AdminShell><AdminIndustriesPage /></AdminShell>} />
             <Route path="/admin/navbar" element={<AdminShell><AdminNavbarPage /></AdminShell>} />

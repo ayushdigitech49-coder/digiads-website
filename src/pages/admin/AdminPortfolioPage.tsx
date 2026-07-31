@@ -31,6 +31,7 @@ import type { PortfolioItem } from '../../types';
 import { adminService } from '../../services/admin.service';
 import { notifyCmsUpdate } from '../../utils/broadcastSync';
 import { Swal } from '../../utils/swal.tsx';
+import { ImageUploadInput } from '../../components/admin/ImageUploadInput';
 
 const categoryBadgeStyles: Record<string, string> = {
   SEO: 'bg-emerald-50 text-emerald-700 border-emerald-200 border',
@@ -791,20 +792,13 @@ export const AdminPortfolioPage: React.FC = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5 flex items-center space-x-1">
-                        <ImageIcon className="w-3.5 h-3.5" /><span>Cover Image URL</span>
-                      </label>
-                      <input
+                      <ImageUploadInput
+                        label="Project Cover Image"
                         value={form.image || ''}
-                        onChange={e => setForm({ ...form, image: e.target.value })}
-                        placeholder="https://images.unsplash.com/… or CDN link"
-                        className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                        onChange={newUrl => setForm({ ...form, image: newUrl })}
+                        placeholder="https://... or upload local image"
+                        helpText="Enter an image URL or click Browse Computer to upload directly via Multer"
                       />
-                      {form.image && (
-                        <div className="mt-2 rounded-2xl overflow-hidden border border-slate-200 max-h-40">
-                          <img src={form.image} alt="preview" className="w-full h-40 object-cover" />
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

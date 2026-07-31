@@ -8,6 +8,7 @@ import { adminService, type AboutConfigData, type AboutBrandItem, type AboutValu
 import { defaultAboutData } from '../../data/aboutData';
 import { Swal } from '../../utils/swal';
 import { notifyCmsUpdate } from '../../utils/broadcastSync';
+import { ImageUploadInput } from '../../components/admin/ImageUploadInput';
 
 export const AdminAboutPage: React.FC = () => {
   const [config, setConfig] = useState<AboutConfigData>(() => {
@@ -376,11 +377,12 @@ export const AdminAboutPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Photo Image URL</label>
-                  <input
+                  <ImageUploadInput
+                    label="Photo Image"
                     value={member.img}
-                    onChange={(e) => updateTeam(idx, 'img', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-[10px] font-mono text-slate-700"
+                    onChange={(newUrl) => updateTeam(idx, 'img', newUrl)}
+                    placeholder="https://... or upload local image"
+                    helpText="Browse computer to upload photo"
                   />
                 </div>
               </div>

@@ -17,6 +17,8 @@ const statusMap: Record<string, { bg: string; text: string; dot: string }> = {
   Lost: { bg: 'bg-red-50 text-red-700 border-red-200', text: 'text-red-700', dot: 'bg-red-500' },
 };
 
+import { notifyCmsUpdate, subscribeCmsUpdate } from '../../utils/broadcastSync';
+
 export const AdminLeadsPage: React.FC = () => {
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,29 +31,41 @@ export const AdminLeadsPage: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const localRaw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
-      const localLeads: LeadItem[] = localRaw.map((l: any) => ({
-        id: l.id || 'local-' + Math.random().toString(36).substring(2, 9),
-        fullName: l.name || l.fullName || 'Anonymous',
-        email: l.email || '',
-        phone: l.phone || '',
-        companyName: l.websiteUrl || l.companyName || '',
-        serviceRequired: l.serviceRequired || `SEO Cost Calculator (${l.websiteType || 'SEO'})`,
-        budget: l.estimatedBudget || l.budget || '₹8,000/mo',
-        message: l.message && l.message.includes('City:') ? l.message : `City: ${l.city || 'N/A'} | Target: ${l.targetLocation || 'N/A'} | Keywords: ${l.keywordTier || 'N/A'} | Tech: ${l.techStack || 'N/A'} | Note: ${l.message || 'None'}`,
-        source: l.source || 'SEO Calculator',
-        status: l.status || 'New',
-        createdAt: l.createdAt || new Date().toISOString()
-      }));
-
       const res = await adminService.getLeads();
-      if (res.success && Array.isArray(res.leads)) {
-        const map = new Map<string, LeadItem>();
-        [...localLeads, ...res.leads].forEach(item => map.set(item.id, item));
-        setLeads(Array.from(map.values()));
+      let merged: LeadItem[] = [];
+      
+      if (res && res.success && Array.isArray(res.leads)) {
+        merged = res.leads.map((l: any) => ({
+          id: l.id || l._id || 'lead-' + Math.random().toString(36).substring(2, 9),
+          fullName: l.fullName || l.name || 'Anonymous',
+          email: l.email || '',
+          phone: l.phone || '',
+          companyName: l.websiteUrl || l.companyName || '',
+          serviceRequired: l.serviceRequired || `SEO Cost Calculator (${l.websiteType || 'SEO'})`,
+          budget: l.monthlyBudget || l.estimatedBudget || l.budget || '₹8,000/mo',
+          message: l.message && l.message.includes('City:') ? l.message : `City: ${l.city || 'N/A'} | Target: ${l.targetLocation || 'N/A'} | Keywords: ${l.keywordTier || 'N/A'} | Tech: ${l.techStack || 'N/A'} | Note: ${l.message || 'None'}`,
+          source: l.source || 'Contact Form',
+          status: l.status || 'New',
+          createdAt: l.createdAt || new Date().toISOString()
+        }));
+
+        // Keep LocalStorage synchronized with backend state
+        try {
+          localStorage.setItem('sumit_leads', JSON.stringify(merged));
+        } catch {}
       } else {
-        setLeads(localLeads);
+        const localRaw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+        merged = localRaw;
       }
+
+      // Sort strictly by createdAt timestamp DESCENDING (Newest lead at top row #1)
+      merged.sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+
+      setLeads(merged);
     } catch {
       setLeads([]);
     } finally { setLoading(false); }
@@ -59,11 +73,16 @@ export const AdminLeadsPage: React.FC = () => {
 
   useEffect(() => {
     fetchData();
+    return subscribeCmsUpdate((type) => {
+      if (type === 'leads' || type === 'all') {
+        fetchData();
+      }
+    });
   }, []);
 
   const filtered = useMemo(() => leads.filter(l => {
-    const s = !search || `${l.fullName} ${l.email} ${l.phone} ${l.serviceRequired} ${l.message}`.toLowerCase().includes(search.toLowerCase());
-    const src = activeSource === 'All' || (l.source || '').toLowerCase().includes(activeSource.toLowerCase().replace(' ', ''));
+    const s = !search || `${l.fullName} ${l.email} ${l.phone} ${l.serviceRequired} ${l.message} ${l.source}`.toLowerCase().includes(search.toLowerCase());
+    const src = activeSource === 'All' || (l.source || '').toLowerCase().includes(activeSource.toLowerCase());
     const st = activeStatus === 'All' || l.status === activeStatus;
     return s && src && st;
   }), [leads, search, activeSource, activeStatus]);
@@ -83,20 +102,32 @@ export const AdminLeadsPage: React.FC = () => {
   const handleDelete = async (id: string, name: string) => {
     const confirm = await Swal.fire({
       title: `Delete lead for ${name}?`,
-      text: 'Are you sure you want to permanently delete this lead inquiry?',
+      text: 'Are you sure you want to permanently delete this lead inquiry from database?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Yes, Delete Lead',
+      confirmButtonText: 'Yes, Delete Permanently',
       confirmButtonColor: 'bg-red-600 hover:bg-red-700',
     });
 
     if (!confirm.isConfirmed) return;
 
     try {
+      // 1. Remove from React state immediately
+      setLeads(prev => prev.filter(l => l.id !== id && (l as any)._id !== id));
+
+      // 2. Remove from LocalStorage so it never resurfaces on re-fetch
+      try {
+        const raw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+        const updated = raw.filter((l: any) => l.id !== id && l._id !== id);
+        localStorage.setItem('sumit_leads', JSON.stringify(updated));
+      } catch {}
+
+      // 3. HARD DELETE from MongoDB Atlas via API
       const res = await adminService.deleteLead(id);
-      if (res.success) {
-        setLeads(leads.filter(l => l.id !== id));
-        Swal.toast(`Lead ${name} removed`, 'warning');
+      notifyCmsUpdate('leads');
+
+      if (res && res.success) {
+        Swal.toast(`Lead ${name} permanently deleted`, 'warning');
       }
     } catch {
       Swal.fire({ title: 'Error', text: 'Could not delete lead', icon: 'error' });
@@ -146,10 +177,10 @@ export const AdminLeadsPage: React.FC = () => {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           { l: 'All Leads', v: stats.total, i: Inbox, c: 'text-[#1352D0]', bg: 'bg-blue-50' },
-          { l: 'New · Unread', v: stats.new, i: Clock, c: 'text-emerald-600', bg: 'bg-emerald-50', t: 'LIVE' },
+          { l: 'New Inquiries', v: stats.new, i: Clock, c: 'text-emerald-600', bg: 'bg-emerald-50', t: 'LIVE' },
           { l: 'In Pipeline', v: stats.contacted, i: Users, c: 'text-purple-600', bg: 'bg-purple-50' },
           { l: 'Closed Won 🎉', v: stats.won, i: Star, c: 'text-amber-600', bg: 'bg-amber-50', t: '⭐' },
-          { l: 'Est. Pipeline (₹)', v: stats.estValue > 0 ? `₹${(stats.estValue / 100000).toFixed(1)}L` : '—', i: DollarSign, c: 'text-[#D91212]', bg: 'bg-red-50' },
+          { l: 'Conversion Rate', v: stats.total ? `${Math.round((stats.won / stats.total) * 100)}%` : '0%', i: Target, c: 'text-[#D91212]', bg: 'bg-red-50' },
         ].map((s, i) => {
           const Icon = s.i;
           return (
@@ -176,12 +207,33 @@ export const AdminLeadsPage: React.FC = () => {
             <Search className="w-4.5 h-4.5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, phone, email, service, message…" className="w-full pl-12 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D91212] text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none transition-all" />
           </div>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-            <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200">
-              {['All', 'New', 'Contacted', 'Proposal Sent', 'Closed Won'].map(st => (
-                <button key={st} onClick={() => setActiveStatus(st)} className={`px-3.5 py-1.5 rounded-xl text-[11px] font-black transition-all whitespace-nowrap cursor-pointer ${activeStatus === st ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{st}</button>
-              ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Form Source Dropdown Filter */}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Source:</span>
+              <select
+                value={activeSource}
+                onChange={(e) => setActiveSource(e.target.value)}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#D91212]/20 cursor-pointer"
+              >
+                <option value="All">All Form Sources</option>
+                <option value="Contact">Contact Us Form</option>
+                <option value="Free Audit">Free Audit Modal</option>
+                <option value="Book Strategy">Book Strategy Call</option>
+                <option value="SEO Audit">SEO Audit Gate</option>
+                <option value="SEO Calculator">SEO Calculator</option>
+              </select>
+            </div>
+
+            <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+
+            <div className="flex items-center space-x-1.5">
+              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+              <div className="flex rounded-2xl bg-slate-100 p-1 border border-slate-200">
+                {['All', 'New', 'Contacted', 'Proposal Sent', 'Closed Won'].map(st => (
+                  <button key={st} onClick={() => setActiveStatus(st)} className={`px-3.5 py-1.5 rounded-xl text-[11px] font-black transition-all whitespace-nowrap cursor-pointer ${activeStatus === st ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}>{st}</button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

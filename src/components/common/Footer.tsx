@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Building2, ShieldCheck } from 'lucide-react';
+import { Phone, Mail, MapPin, Building2, ShieldCheck, MessageCircle } from 'lucide-react';
 import { theme } from '../../config/theme';
 import { Logo } from './Logo';
 import { adminService } from '../../services/admin.service';
@@ -35,7 +35,7 @@ export const Footer: React.FC = () => {
 
     fetchContactConfig();
     const unsubscribe = subscribeCmsUpdate((type) => {
-      if (type === 'contact' || type === 'all') {
+      if (type === 'contact' || type === 'all' || type === 'cms_updated') {
         fetchContactConfig();
       }
     });
@@ -46,88 +46,74 @@ export const Footer: React.FC = () => {
   return (
     <footer className="bg-slate-950 text-slate-300 pt-16 pb-8 border-t border-slate-800 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800/80">
           
-          {/* Col 1: Brand Info & Growth Taglines */}
+          {/* Col 1: Brand Info & Dynamic Growth Taglines */}
           <div className="space-y-4">
             <Link to="/" className="inline-block hover:opacity-90 transition-opacity">
               <Logo size="md" variant="dark" />
             </Link>
 
             <div className="space-y-2.5 text-xs font-bold text-slate-300 pt-1">
-              <div className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1352D0] shrink-0" />
-                <span>AI-Powered Search & Revenue Growth Engine</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                <span>High-ROAS Performance Ads & Scalable SEO</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
-                <span>Full-Stack Digital Growth Engineering Squad</span>
-              </div>
+              {(contactConfig?.footerTaglines && contactConfig.footerTaglines.length > 0
+                ? contactConfig.footerTaglines
+                : defaultContactData.footerTaglines || []
+              ).map((tagline, idx) => {
+                const bulletColors = ['bg-[#1352D0]', 'bg-emerald-400', 'bg-indigo-400', 'bg-amber-400', 'bg-purple-400'];
+                const colorClass = bulletColors[idx % bulletColors.length];
+                return (
+                  <div key={idx} className="flex items-center space-x-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${colorClass} shrink-0`} />
+                    <span>{tagline}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Col 2: Growth Divisions */}
           <div>
             <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
-              Growth Divisions
+              {contactConfig?.growthDivisionsHeading || defaultContactData.growthDivisionsHeading}
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400 font-medium">
-              <li>
-                <Link to="/services/seo-services" className="hover:text-blue-400 transition-colors">
-                  SEO & Organic Search (SEO Company Jaipur)
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/performance-marketing" className="hover:text-blue-400 transition-colors">
-                  Performance Ads (PerformanceMarketing4U)
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/web-development" className="hover:text-blue-400 transition-colors">
-                  Web & App Engineering (Arvian Stack)
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/social-media-marketing" className="hover:text-blue-400 transition-colors">
-                  Social Media & Reels (Digimagnate)
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/branding-and-design" className="hover:text-blue-400 transition-colors">
-                  Branding & Identity Design
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/ai-marketing-solutions" className="hover:text-blue-400 transition-colors">
-                  AI Marketing & Voice Agents
-                </Link>
-              </li>
+              {(contactConfig?.growthDivisionsLinks && contactConfig.growthDivisionsLinks.length > 0
+                ? contactConfig.growthDivisionsLinks
+                : defaultContactData.growthDivisionsLinks || []
+              ).map((link, idx) => (
+                <li key={idx}>
+                  <Link to={link.path} className="hover:text-blue-400 transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Col 3: Platform & Company */}
           <div>
             <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
-              Platform & Company
+              {contactConfig?.platformCompanyHeading || defaultContactData.platformCompanyHeading}
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400 font-medium">
-              <li><Link to="/about" className="hover:text-white transition-colors">About Agency Merger</Link></li>
-              <li><Link to="/case-studies" className="hover:text-white transition-colors">Client Case Studies</Link></li>
-              <li><Link to="/portfolio" className="hover:text-white transition-colors">Work Showcase</Link></li>
-              <li><Link to="/pricing" className="hover:text-white transition-colors">Growth Plans & Pricing</Link></li>
-              <li><Link to="/blog" className="hover:text-white transition-colors">SEO & Ads Blog</Link></li>
-              <li><Link to="/free-audit" className="hover:text-white transition-colors">Free Website Audit Tool</Link></li>
+              {(contactConfig?.platformCompanyLinks && contactConfig.platformCompanyLinks.length > 0
+                ? contactConfig.platformCompanyLinks
+                : defaultContactData.platformCompanyLinks || []
+              ).map((link, idx) => (
+                <li key={idx}>
+                  <Link to={link.path} className="hover:text-white transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Col 4: Service Cities Column (Matching Growth Divisions Font & Layout) */}
+          {/* Col 4: Service Cities Column */}
           <div>
             <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
-              Service Cities
+              {contactConfig?.serviceCitiesHeading || defaultContactData.serviceCitiesHeading}
             </h3>
             <ul className="space-y-2.5 text-xs text-slate-400 font-medium">
               {[
@@ -145,24 +131,21 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Col 5: Trust & Merger Badge */}
+          {/* Col 5: Legacy Brand Equity Cards */}
           <div>
             <h3 className="text-xs font-bold text-white uppercase tracking-widest mb-4">
-              Legacy Brand Equity
+              {contactConfig?.legacyBrandHeading || defaultContactData.legacyBrandHeading}
             </h3>
             <div className="space-y-2 text-xs text-slate-400">
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="font-bold text-white block">SEO Company Jaipur</span>
-                <span className="text-[11px] text-slate-400">12k+ Organic Rankings</span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="font-bold text-white block">PerformanceMarketing4U</span>
-                <span className="text-[11px] text-slate-400">$5M+ Ad Spend Managed</span>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="font-bold text-white block">Arvian + Digimagnate</span>
-                <span className="text-[11px] text-slate-400">Full-Stack Tech & Social</span>
-              </div>
+              {(contactConfig?.legacyBrandCards && contactConfig.legacyBrandCards.length > 0
+                ? contactConfig.legacyBrandCards
+                : defaultContactData.legacyBrandCards || []
+              ).map((card, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800">
+                  <span className="font-bold text-white block">{card.title}</span>
+                  <span className="text-[11px] text-slate-400">{card.stat}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -170,15 +153,15 @@ export const Footer: React.FC = () => {
 
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} Sumit DigiTech Pvt. Ltd. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {contactConfig?.copyrightText || defaultContactData.copyrightText}</p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <span className="flex items-center space-x-1 text-slate-400">
               <ShieldCheck className="w-4 h-4 text-blue-500" />
-              <span>Enterprise Grade Security</span>
+              <span>{contactConfig?.securityText || defaultContactData.securityText}</span>
             </span>
             <span className="text-slate-600">|</span>
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

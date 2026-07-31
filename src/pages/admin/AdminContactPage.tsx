@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Plus, Trash2, Phone, Mail, MapPin, Sparkles, CheckCircle2, MessageCircle, FileText, Building2 } from 'lucide-react';
+import { Save, Plus, Trash2, Sparkles, CheckCircle2, FileText, PhoneCall } from 'lucide-react';
 import { adminService } from '../../services/admin.service';
-import { defaultContactData, type ContactConfigData, type ContactFaqItem } from '../../data/contactData';
+import { defaultContactData, type ContactConfigData } from '../../data/contactData';
 import { notifyCmsUpdate } from '../../utils/broadcastSync';
 
 export const AdminContactPage: React.FC = () => {
@@ -76,18 +76,18 @@ export const AdminContactPage: React.FC = () => {
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div>
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-50 text-[#1352D0] text-xs font-black mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Contact Page CMS Controls</span>
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-black mb-2">
+            <PhoneCall className="w-3.5 h-3.5" />
+            <span>Contact Us Page CMS Controls</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Manage Contact Us Page</h1>
-          <p className="text-xs sm:text-sm text-slate-500 font-bold">Update phone numbers, WhatsApp, email, office address, hero titles, and FAQs in real time.</p>
+          <p className="text-xs sm:text-sm text-slate-500 font-bold">Update Hero titles, subtext, SEO Meta tags, and Contact FAQs in real time.</p>
         </div>
 
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-3.5 bg-[#1352D0] hover:bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-blue-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+          className="px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-sm shadow-xl shadow-red-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
           <span>{saving ? 'Saving...' : 'Save Changes'}</span>
@@ -101,162 +101,10 @@ export const AdminContactPage: React.FC = () => {
         </motion.div>
       )}
 
-      {/* SECTION 1: CONTACT CHANNELS */}
+      {/* SECTION 1: HERO & META SETTINGS */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
         <h2 className="text-lg font-black text-slate-900 flex items-center space-x-2">
-          <Phone className="w-5 h-5 text-[#1352D0]" />
-          <span>Contact Channels (Phone, WhatsApp, Email, Office)</span>
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Phone */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-black uppercase text-[#1352D0]">
-              <Phone className="w-4 h-4" />
-              <span>Direct Phone Hotline</span>
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Phone Number</label>
-              <input
-                type="text"
-                value={config.phone}
-                onChange={e => setConfig({ ...config, phone: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Hours Subtext</label>
-              <input
-                type="text"
-                value={config.phoneHours}
-                onChange={e => setConfig({ ...config, phoneHours: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-medium text-slate-900 bg-white"
-              />
-            </div>
-          </div>
-
-          {/* WhatsApp */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-black uppercase text-emerald-600">
-              <MessageCircle className="w-4 h-4" />
-              <span>WhatsApp VIP Desk</span>
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">WhatsApp Number</label>
-              <input
-                type="text"
-                value={config.whatsapp}
-                onChange={e => setConfig({ ...config, whatsapp: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Response Time Subtext</label>
-              <input
-                type="text"
-                value={config.whatsappResponseTime}
-                onChange={e => setConfig({ ...config, whatsappResponseTime: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-medium text-slate-900 bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-black uppercase text-blue-600">
-              <Mail className="w-4 h-4" />
-              <span>Official Email</span>
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Email Address</label>
-              <input
-                type="text"
-                value={config.email}
-                onChange={e => setConfig({ ...config, email: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">SLA Guarantee Subtext</label>
-              <input
-                type="text"
-                value={config.emailSla}
-                onChange={e => setConfig({ ...config, emailSla: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-medium text-slate-900 bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Office */}
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-black uppercase text-red-600">
-              <MapPin className="w-4 h-4" />
-              <span>Jaipur HQ Address</span>
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Address Line 1</label>
-              <input
-                type="text"
-                value={config.officeAddressLine1}
-                onChange={e => setConfig({ ...config, officeAddressLine1: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 bg-white"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-600 block mb-1">Address Line 2 (City, State, Pincode)</label>
-              <input
-                type="text"
-                value={config.officeAddressLine2}
-                onChange={e => setConfig({ ...config, officeAddressLine2: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-medium text-slate-900 bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Footer City & Service Cities CMS Fields */}
-          <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-4 md:col-span-2">
-            <div className="flex items-center space-x-2 text-xs font-black uppercase text-[#1352D0]">
-              <Building2 className="w-4 h-4" />
-              <span>Footer City & Service Cities CMS Control</span>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Headquarter City (Top Footer Card)</label>
-                <input
-                  type="text"
-                  value={config.city || 'Jaipur, Rajasthan, India'}
-                  onChange={e => setConfig({ ...config, city: e.target.value })}
-                  placeholder="e.g. Jaipur, Rajasthan, India"
-                  className="w-full px-4 py-2.5 rounded-xl border border-blue-300 font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1352D0]"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 block mb-1">Services Available In These Cities (Footer Locations List)</label>
-                <input
-                  type="text"
-                  value={config.availableCities || 'Jaipur, Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad'}
-                  onChange={e => setConfig({ ...config, availableCities: e.target.value })}
-                  placeholder="e.g. Jaipur, Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad"
-                  className="w-full px-4 py-2.5 rounded-xl border border-blue-300 font-bold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#1352D0]"
-                />
-              </div>
-            </div>
-
-            <p className="text-[11px] text-slate-500 font-semibold">
-              These fields replace the old static street address & long paragraph in the website Footer with a clean list of service cities.
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      {/* SECTION 2: HERO & META SETTINGS */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-        <h2 className="text-lg font-black text-slate-900 flex items-center space-x-2">
-          <FileText className="w-5 h-5 text-[#1352D0]" />
+          <FileText className="w-5 h-5 text-red-600" />
           <span>Hero Header & Meta SEO Settings</span>
         </h2>
 
@@ -309,7 +157,7 @@ export const AdminContactPage: React.FC = () => {
         </div>
       </div>
 
-      {/* SECTION 3: FAQS EDITOR */}
+      {/* SECTION 2: FAQS EDITOR */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-black text-slate-900 flex items-center space-x-2">

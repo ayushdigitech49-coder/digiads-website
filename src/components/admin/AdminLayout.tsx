@@ -54,7 +54,8 @@ const sidebarSections = [
     heading: 'OPERATIONS & CMS',
     items: [
       { path: '/admin/leads', label: 'Lead Inbox', icon: Inbox, badge: null, color: 'text-[#D91212]' },
-      { path: '/admin/contact', label: 'Footer & Contact CMS', icon: PhoneCall, badge: null, color: 'text-red-600' },
+      { path: '/admin/seo-audits', label: 'SEO Audit Leads', icon: Zap, badge: 'HOT', color: 'text-amber-500' },
+      { path: '/admin/footer', label: 'Footer CMS', icon: Layout, badge: null, color: 'text-blue-600' },
       { path: '/admin/media', label: 'Media Press CMS', icon: Award, badge: null, color: 'text-amber-500' },
       { path: '/admin/announcement-bar', label: 'Announcement Bar', icon: Megaphone, badge: null, color: 'text-amber-500' },
       { path: '/admin/hero', label: 'Hero Content CMS', icon: Layout, badge: null, color: 'text-[#1352D0]' },
@@ -78,10 +79,24 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notificationLeads, setNotificationLeads] = useState<any[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const loadNotifications = () => {
+  const loadNotifications = async () => {
     try {
-      const raw = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
-      setNotificationLeads(raw);
+      const rawLocal = JSON.parse(localStorage.getItem('sumit_leads') || '[]');
+      let allLeads = [...rawLocal];
+      try {
+        const res = await adminService.getLeads();
+        if (res && res.success && Array.isArray(res.leads)) {
+          const map = new Map<string, any>();
+          [...rawLocal, ...res.leads].forEach(item => map.set(item.id, item));
+          allLeads = Array.from(map.values());
+        }
+      } catch {}
+      allLeads.sort((a: any, b: any) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      setNotificationLeads(allLeads);
     } catch {}
   };
 
@@ -94,7 +109,16 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
-  const unreadCount = notificationLeads.filter((l: any) => l.status === 'New' || !l.status).length;
+  const unreadLeads = notificationLeads.filter((l: any) => l.status === 'New' || !l.status);
+  const unreadCount = unreadLeads.length;
+
+  const markAllRead = () => {
+    const updated = notificationLeads.map((l: any) => ({ ...l, status: 'Contacted' }));
+    setNotificationLeads(updated);
+    try {
+      localStorage.setItem('sumit_leads', JSON.stringify(updated));
+    } catch {}
+  };
 
   // Auto Reset Scroll Position to Top on Page Navigation
   useEffect(() => {
@@ -273,9 +297,9 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center space-x-2">
-              <span className="text-base font-black text-slate-900 tracking-tight">Super Admin Control Panel</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-black">LIVE</span>
+            <div className="flex items-center space-x-1.5 sm:space-x-2 truncate">
+              <span className="text-xs sm:text-base font-black text-slate-900 tracking-tight truncate">Super Admin <span className="hidden xs:inline sm:inline">Control Panel</span></span>
+              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] sm:text-xs font-black">LIVE</span>
             </div>
           </div>
 
@@ -319,37 +343,48 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                         <Bell className="w-4 h-4 text-emerald-400" />
                         <span className="text-xs font-black uppercase tracking-wider">Lead Notifications</span>
                       </div>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                        {unreadCount} New
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllRead}
+                            className="text-[10px] font-bold text-slate-300 hover:text-white underline cursor-pointer"
+                          >
+                            Mark Read
+                          </button>
+                        )}
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                          {unreadCount} New
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                    <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
                       {notificationLeads.length === 0 ? (
                         <div className="p-6 text-center text-xs text-slate-400 font-medium">
                           No lead notifications yet.
                         </div>
                       ) : (
-                        notificationLeads.slice(0, 5).map((l: any, i: number) => (
+                        notificationLeads.slice(0, 8).map((l: any, i: number) => (
                           <div
                             key={l.id || i}
                             onClick={() => {
                               setNotifOpen(false);
                               navigate('/admin/leads');
                             }}
-                            className="p-3 hover:bg-blue-50/60 transition-colors cursor-pointer space-y-1"
+                            className={`p-3 hover:bg-blue-50/60 transition-colors cursor-pointer space-y-1 ${l.status === 'New' || !l.status ? 'bg-amber-50/30' : ''}`}
                           >
                             <div className="flex items-center justify-between text-xs">
                               <span className="font-extrabold text-slate-900 truncate">{l.name || l.fullName}</span>
-                              <span className="text-[10px] font-bold text-slate-400">
-                                {l.createdAt ? new Date(l.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-blue-50 text-[#1352D0] border border-blue-100">
+                                {l.source || 'Contact Form'}
                               </span>
                             </div>
                             <div className="text-[11px] font-bold text-[#1352D0] truncate">
                               {l.serviceRequired || l.websiteType || 'SEO Inquiry'}
                             </div>
-                            <div className="text-[10px] font-medium text-slate-500 truncate">
-                              📞 {l.phone} | 📍 {l.city || 'India'}
+                            <div className="text-[10px] font-medium text-slate-500 truncate flex items-center justify-between">
+                              <span>📞 {l.phone}</span>
+                              <span>{l.createdAt ? new Date(l.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}</span>
                             </div>
                           </div>
                         ))

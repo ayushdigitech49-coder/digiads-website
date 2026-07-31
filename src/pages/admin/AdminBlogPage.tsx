@@ -8,6 +8,7 @@ import {
 import { Editor } from '@tinymce/tinymce-react';
 import type { BlogPost } from '../../types';
 import { getStoredBlogPosts, saveStoredBlogPosts, subscribeBlogUpdates } from '../../utils/blogStore';
+import { ImageUploadInput } from '../../components/admin/ImageUploadInput';
 
 const categoryColor: Record<string, string> = {
   'SEO Strategy': 'bg-emerald-50 text-emerald-700 border-emerald-200 border',
@@ -549,14 +550,12 @@ export const AdminBlogPage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">
-                          Cover Image URL
-                        </label>
-                        <input
+                        <ImageUploadInput
+                          label="Blog Article Cover Image"
                           value={form.image || ''}
-                          onChange={e => setForm({ ...form, image: e.target.value })}
-                          placeholder="https://images.unsplash.com/..."
-                          className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                          onChange={(newUrl) => setForm({ ...form, image: newUrl })}
+                          placeholder="https://... or click Browse Computer"
+                          helpText="Browse computer to upload blog cover image"
                         />
                       </div>
 

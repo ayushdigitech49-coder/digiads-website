@@ -9,6 +9,7 @@ import {
 import { adminService, type NavbarItem } from '../../services/admin.service';
 import { notifyCmsUpdate } from '../../utils/broadcastSync';
 import { Swal } from '../../utils/swal.tsx';
+import { ImageUploadInput } from '../../components/admin/ImageUploadInput';
 
 const routeIcons: Record<string, any> = {
   '/': Home,
@@ -502,14 +503,13 @@ export const AdminNavbarPage: React.FC = () => {
                 <input required value={megaForm.path} onChange={e => setMegaForm({ ...megaForm, path: e.target.value })} placeholder="/services/seo-services" className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-mono font-bold text-[#1352D0] focus:outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Custom Image / Icon URL (Optional)</label>
-                <input value={megaForm.imageUrl} onChange={e => setMegaForm({ ...megaForm, imageUrl: e.target.value })} placeholder="https://example.com/logo.png or SVG URL" className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-mono font-bold text-slate-900 focus:outline-none" />
-                {megaForm.imageUrl && (
-                  <div className="mt-2 flex items-center space-x-2 p-2 rounded-xl bg-slate-100 border border-slate-200">
-                    <img src={megaForm.imageUrl} alt="Preview" className="w-7 h-7 object-contain rounded-md" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                    <span className="text-[10px] font-bold text-slate-600">Custom Image Preview</span>
-                  </div>
-                )}
+                <ImageUploadInput
+                  label="Custom Image / Icon (Browse Computer or URL)"
+                  value={megaForm.imageUrl || ''}
+                  onChange={(newUrl) => setMegaForm({ ...megaForm, imageUrl: newUrl })}
+                  placeholder="https://... or click Browse Computer"
+                  helpText="Browse computer to upload icon or logo image"
+                />
               </div>
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Badge Letter / Icon Text</label>

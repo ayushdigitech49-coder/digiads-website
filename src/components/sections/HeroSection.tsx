@@ -100,8 +100,32 @@ export const HeroSection: React.FC = () => {
           />
         )}
 
+        {/* Dynamic Gradient Mode */}
+        {config.bgMode === 'gradient' && (
+          <div
+            className={`absolute inset-0 pointer-events-none transition-all duration-700 ${
+              config.gradientPreset === 'sapphire_emerald' ? 'bg-gradient-to-br from-[#091E3A] via-[#1352D0] to-[#10B981] opacity-70' :
+              config.gradientPreset === 'cyber_purple' ? 'bg-gradient-to-br from-[#1A0B2E] via-[#8B5CF6] to-[#D91212] opacity-70' :
+              config.gradientPreset === 'deep_onyx' ? 'bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#020617] opacity-90' :
+              'bg-gradient-to-br from-[#010819] via-[#1352D0] to-[#0A3D9E] opacity-75'
+            }`}
+          />
+        )}
+
+        {/* Dynamic Grid Mesh Mode */}
+        {config.bgMode === 'grid' && (
+          <div
+            className="absolute inset-0 pointer-events-none transition-all duration-500"
+            style={{
+              opacity: parseFloat(config.gridOpacity || '0.30'),
+              backgroundImage: `linear-gradient(to right, ${config.gridColor || '#1352D0'} 1px, transparent 1px), linear-gradient(to bottom, ${config.gridColor || '#1352D0'} 1px, transparent 1px)`,
+              backgroundSize: '48px 48px',
+            }}
+          />
+        )}
+
         {/* Dark Vignette & Color Overlay */}
-        <div className="absolute inset-0 bg-[rgba(1,8,25,0.82)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[rgba(1,8,25,0.75)] pointer-events-none" />
 
         {/* Floating High-Tech Analytics Stat Badges */}
         {(config.showFloatingCards ?? true) && config.floatingProofCards && config.floatingProofCards.length > 0 ? (

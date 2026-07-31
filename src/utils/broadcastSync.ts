@@ -29,6 +29,7 @@ export const subscribeCmsUpdate = (callback: (type: string, data?: any) => void)
 
   window.addEventListener('storage', handleLocalEvent);
   window.addEventListener('cms_updated', handleLocalEvent);
+  window.addEventListener('contact_updated', handleLocalEvent);
   window.addEventListener('hero_updated', handleLocalEvent);
   window.addEventListener('reels_updated', handleLocalEvent);
   window.addEventListener('pricing_updated', handleLocalEvent);
@@ -40,6 +41,7 @@ export const subscribeCmsUpdate = (callback: (type: string, data?: any) => void)
     }
     window.removeEventListener('storage', handleLocalEvent);
     window.removeEventListener('cms_updated', handleLocalEvent);
+    window.removeEventListener('contact_updated', handleLocalEvent);
     window.removeEventListener('hero_updated', handleLocalEvent);
     window.removeEventListener('reels_updated', handleLocalEvent);
     window.removeEventListener('pricing_updated', handleLocalEvent);

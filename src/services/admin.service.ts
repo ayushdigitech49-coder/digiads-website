@@ -588,4 +588,56 @@ export const adminService = {
       return { success: false };
     }
   },
+
+  // 12. SEO Audit Engine & Leads API
+  runSeoAudit: async (data: { url: string; name?: string; email?: string; phone?: string }) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/seo-audit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) return { success: false };
+      return res.json();
+    } catch {
+      return { success: false };
+    }
+  },
+
+  getSeoAuditLeads: async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/seo-audit/leads`);
+      if (!res.ok) return { success: false, leads: [] };
+      return res.json();
+    } catch {
+      return { success: false, leads: [] };
+    }
+  },
+
+  deleteSeoAuditLead: async (id: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/seo-audit/leads/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) return { success: false };
+      return res.json();
+    } catch {
+      return { success: false };
+    }
+  },
+
+  // 8. Image Upload via Multer
+  uploadImage: async (file: File): Promise<{ success: boolean; url?: string; message?: string }> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Failed to upload image' };
+    }
+  },
 };

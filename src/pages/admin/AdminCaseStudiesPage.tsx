@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { caseStudiesData } from '../../data/caseStudiesData';
 import type { CaseStudy } from '../../types';
+import { ImageUploadInput } from '../../components/admin/ImageUploadInput';
 
 const industryColors: Record<string, string> = {
   'Real Estate': 'bg-emerald-50 text-emerald-700 border-emerald-200 border',
@@ -255,15 +256,18 @@ export const AdminCaseStudiesPage: React.FC = () => {
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Case Study Title *</label>
                   <input required value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none" />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Badge Label</label>
-                    <input value={form.badge || ''} onChange={e => setForm({ ...form, badge: e.target.value })} placeholder="Flagship / Featured / New" className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Cover Image URL</label>
-                    <input value={form.image || ''} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="https://…" className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none" />
-                  </div>
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Badge Label</label>
+                  <input value={form.badge || ''} onChange={e => setForm({ ...form, badge: e.target.value })} placeholder="Flagship / Featured / New" className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#1352D0] text-sm font-bold text-slate-900 focus:outline-none" />
+                </div>
+                <div>
+                  <ImageUploadInput
+                    label="Case Study Cover Image"
+                    value={form.image || ''}
+                    onChange={(newUrl) => setForm({ ...form, image: newUrl })}
+                    placeholder="https://... or click Browse Computer"
+                    helpText="Browse computer to upload Case Study image"
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Executive Summary</label>

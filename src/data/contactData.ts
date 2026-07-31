@@ -1,3 +1,13 @@
+export interface FooterLinkItem {
+  label: string;
+  path: string;
+}
+
+export interface LegacyBrandCard {
+  title: string;
+  stat: string;
+}
+
 export interface ContactFaqItem {
   q: string;
   a: string;
@@ -19,6 +29,16 @@ export interface ContactConfigData {
   officeAddressLine1: string;
   officeAddressLine2: string;
   officeHours: string;
+  footerTaglines?: string[];
+  growthDivisionsHeading?: string;
+  growthDivisionsLinks?: FooterLinkItem[];
+  platformCompanyHeading?: string;
+  platformCompanyLinks?: FooterLinkItem[];
+  serviceCitiesHeading?: string;
+  legacyBrandHeading?: string;
+  legacyBrandCards?: LegacyBrandCard[];
+  copyrightText?: string;
+  securityText?: string;
   customScript?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -41,6 +61,38 @@ export const defaultContactData: ContactConfigData = {
   officeAddressLine1: 'Tonk Road, Malviya Nagar',
   officeAddressLine2: 'Jaipur, Rajasthan, India • 302017',
   officeHours: 'Visits by appointment (Mon-Sat)',
+  footerTaglines: [
+    'AI-Powered Search & Revenue Growth Engine',
+    'High-ROAS Performance Ads & Scalable SEO',
+    'Full-Stack Digital Growth Engineering Squad',
+  ],
+  growthDivisionsHeading: 'Growth Divisions',
+  growthDivisionsLinks: [
+    { label: 'SEO & Organic Search (SEO Company Jaipur)', path: '/services/seo-services' },
+    { label: 'Performance Ads (PerformanceMarketing4U)', path: '/services/performance-marketing' },
+    { label: 'Web & App Engineering (Arvian Stack)', path: '/services/web-development' },
+    { label: 'Social Media & Reels (Digimagnate)', path: '/services/social-media-marketing' },
+    { label: 'Branding & Identity Design', path: '/services/branding-and-design' },
+    { label: 'AI Marketing & Voice Agents', path: '/services/ai-marketing-solutions' },
+  ],
+  platformCompanyHeading: 'Platform & Company',
+  platformCompanyLinks: [
+    { label: 'About Agency Merger', path: '/about' },
+    { label: 'Client Case Studies', path: '/case-studies' },
+    { label: 'Work Showcase', path: '/portfolio' },
+    { label: 'Growth Plans & Pricing', path: '/pricing' },
+    { label: 'SEO & Ads Blog', path: '/blog' },
+    { label: 'Free Website Audit Tool', path: '/free-audit' },
+  ],
+  serviceCitiesHeading: 'Service Cities',
+  legacyBrandHeading: 'Legacy Brand Equity',
+  legacyBrandCards: [
+    { title: 'SEO Company Jaipur', stat: '12k+ Organic Rankings' },
+    { title: 'PerformanceMarketing4U', stat: '$5M+ Ad Spend Managed' },
+    { title: 'Arvian + Digimagnate', stat: 'Full-Stack Tech & Social' },
+  ],
+  copyrightText: 'Sumit DigiTech Pvt. Ltd. All rights reserved.',
+  securityText: 'Enterprise Grade Security',
   metaTitle: 'Contact Us | Sumit DigiTech Jaipur Digital Growth Agency',
   metaDescription: 'Get in touch with Sumit DigiTech. Call +91 98765 43210 or email growth@sumitdigitech.com for a free 30-minute growth consultation.',
   faqs: [

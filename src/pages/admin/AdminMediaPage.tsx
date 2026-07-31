@@ -7,6 +7,7 @@ import {
 import { adminService } from '../../services/admin.service';
 import { Swal } from '../../utils/swal.tsx';
 import { notifyCmsUpdate } from '../../utils/broadcastSync';
+import { ImageUploadInput } from '../../components/admin/ImageUploadInput';
 
 export interface MediaItemCMS {
   id: string;
@@ -290,14 +291,13 @@ export const AdminMediaPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1.5">Logo Image URL (Optional)</label>
-                  <input value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} placeholder="https://example.com/logo.jpg" className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-mono font-bold text-slate-900 focus:outline-none" />
-                  {form.imageUrl && (
-                    <div className="mt-2 flex items-center space-x-2 p-2 rounded-xl bg-slate-100 border border-slate-200">
-                      <img src={form.imageUrl} alt="Preview" className="w-8 h-8 object-contain rounded-md" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                      <span className="text-[10px] font-bold text-slate-600">Logo Image Preview</span>
-                    </div>
-                  )}
+                  <ImageUploadInput
+                    label="Media Partner Logo"
+                    value={form.imageUrl}
+                    onChange={(newUrl) => setForm({ ...form, imageUrl: newUrl })}
+                    placeholder="https://... or click Browse Computer"
+                    helpText="Enter image URL or click Browse Computer to upload logo directly"
+                  />
                 </div>
 
                 <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
