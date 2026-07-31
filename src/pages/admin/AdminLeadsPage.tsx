@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Inbox, Search, Filter, Plus, Check, X, Trash2, ChevronDown, Sparkles,
+  Inbox, Search, Filter, Plus, Check, CheckCircle2, X, Trash2, ChevronDown, Sparkles,
   Phone, Mail, Calendar, Building2, DollarSign, MessageCircle, Download,
   Clock, Eye, ArrowRight, Users, TrendingUp, Zap, Target, Star
 } from 'lucide-react';
@@ -285,7 +285,14 @@ export const AdminLeadsPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 text-xs font-extrabold">{l.serviceRequired || 'General Strategy'}</span>
+                        <span className={`px-3 py-1.5 rounded-xl text-xs font-black inline-flex items-center space-x-1.5 ${
+                          (l.serviceRequired || '').toLowerCase().includes('package')
+                            ? 'bg-blue-600 text-white shadow-xs border border-blue-700'
+                            : 'bg-slate-100 text-slate-900 border border-slate-200'
+                        }`}>
+                          {(l.serviceRequired || '').toLowerCase().includes('package') && <Sparkles className="w-3.5 h-3.5 text-[#F4B400]" />}
+                          <span>{l.serviceRequired || 'General Strategy'}</span>
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-xs font-black text-emerald-700">{l.monthlyBudget || <span className="text-slate-400 font-medium">Not set</span>}</div>
@@ -341,44 +348,153 @@ export const AdminLeadsPage: React.FC = () => {
       <AnimatePresence>
         {previewLead && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewLead(null)} className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPreviewLead(null)} className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40" />
             <motion.aside
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-full sm:w-[520px] bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col text-slate-900"
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              className="fixed right-0 top-0 bottom-0 w-full sm:w-[540px] bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col text-slate-900"
             >
+              {/* Drawer Top Header */}
               <div className="h-20 border-b border-slate-200 px-6 flex items-center justify-between shrink-0 bg-slate-50">
-                <div className="flex items-center space-x-3">
-                  <div className="w-11 h-11 rounded-2xl bg-[#1352D0] flex items-center justify-center font-black text-white text-sm">
+                <div className="flex items-center space-x-3 truncate">
+                  <div className="w-11 h-11 rounded-2xl bg-[#1352D0] flex items-center justify-center font-black text-white text-sm shrink-0 shadow-md">
                     {previewLead.fullName.split(' ').map(n => n[0]).slice(0, 2).join('')}
                   </div>
-                  <div>
-                    <div className="text-base font-black text-slate-900 leading-tight">{previewLead.fullName}</div>
-                    <div className="text-xs text-slate-500 font-bold">{previewLead.email}</div>
+                  <div className="truncate">
+                    <div className="text-base font-black text-slate-900 leading-tight truncate">{previewLead.fullName}</div>
+                    <div className="text-xs text-slate-500 font-bold truncate">{previewLead.email || 'No email provided'}</div>
                   </div>
                 </div>
-                <button onClick={() => setPreviewLead(null)} className="p-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-900 cursor-pointer"><X className="w-5 h-5" /></button>
+                <button onClick={() => setPreviewLead(null)} className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-900 cursor-pointer transition-all" title="Close"><X className="w-5 h-5" /></button>
               </div>
-              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5 bg-white">
+
+              {/* Drawer Scrollable Content */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 bg-white">
+                
+                {/* Status & Source Badges Header */}
+                <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-blue-50/60 border border-blue-100">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">Capture Source</div>
+                    <span className="px-3 py-1 rounded-full bg-blue-600 text-white text-xs font-black inline-block shadow-xs">
+                      {previewLead.source || 'Website Contact Form'}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-right">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-500">Current Lead Status</div>
+                    <select
+                      value={previewLead.status}
+                      onChange={e => {
+                        const newSt = e.target.value;
+                        handleStatus(previewLead.id, newSt, previewLead.fullName);
+                        setPreviewLead({ ...previewLead, status: newSt as any });
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-xs font-black text-slate-900 focus:outline-none cursor-pointer shadow-xs"
+                    >
+                      <option value="New">🟢 New</option>
+                      <option value="Contacted">🟡 Contacted</option>
+                      <option value="Proposal Sent">🔵 Proposal Sent</option>
+                      <option value="Closed Won">🎉 Closed Won</option>
+                      <option value="Lost">🔴 Lost</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Contact Quick Action Bar */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                    <a href={`tel:${previewLead.phone}`} className="flex items-center space-x-2 text-emerald-600 font-bold"><Phone className="w-4 h-4" /><span className="text-xs uppercase tracking-wider text-slate-500">Phone ({previewLead.contactMethod || 'WhatsApp'})</span></a>
-                    <div className="text-sm font-black text-slate-900">{previewLead.phone}</div>
+                  <a href={`tel:${previewLead.phone}`} className="p-3.5 rounded-2xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 transition-all flex items-center space-x-3 group">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-110 transition-all">
+                      <Phone className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="truncate">
+                      <div className="text-[10px] font-bold uppercase text-slate-500">Phone ({previewLead.contactMethod || 'Call'})</div>
+                      <div className="text-xs font-black text-slate-900 truncate">{previewLead.phone || 'N/A'}</div>
+                    </div>
+                  </a>
+                  <a href={`mailto:${previewLead.email}`} className="p-3.5 rounded-2xl bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition-all flex items-center space-x-3 group">
+                    <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#1352D0] flex items-center justify-center shrink-0 group-hover:scale-110 transition-all">
+                      <Mail className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="truncate">
+                      <div className="text-[10px] font-bold uppercase text-slate-500">Email Address</div>
+                      <div className="text-xs font-black text-slate-900 truncate">{previewLead.email || 'N/A'}</div>
+                    </div>
+                  </a>
+                </div>
+
+                {/* Form Field Submissions Summary Table */}
+                <div className="space-y-3">
+                  <div className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center space-x-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#1352D0]" />
+                    <span>Captured Form Parameters</span>
                   </div>
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-                    <a href={`mailto:${previewLead.email}`} className="flex items-center space-x-2 text-[#1352D0] font-bold"><Mail className="w-4 h-4" /><span className="text-xs uppercase tracking-wider text-slate-500">Email</span></a>
-                    <div className="text-sm font-black text-slate-900 truncate">{previewLead.email}</div>
+                  
+                  <div className="rounded-2xl border border-slate-200 overflow-hidden divide-y divide-slate-100 bg-slate-50/50">
+                    {/* Selected Plan - prominent highlight */}
+                    <div className="p-3.5 flex items-center justify-between text-xs bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <span className="font-bold text-slate-500">Selected Plan</span>
+                      <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black ${
+                        (previewLead.serviceRequired || '').toLowerCase().includes('growth')
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : (previewLead.serviceRequired || '').toLowerCase().includes('starter')
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : (previewLead.serviceRequired || '').toLowerCase().includes('advanced')
+                          ? 'bg-purple-600 text-white shadow-sm'
+                          : 'bg-slate-200 text-slate-800'
+                      }`}>
+                        {(previewLead.serviceRequired || '').toLowerCase().includes('growth') && '⚡'}
+                        {(previewLead.serviceRequired || '').toLowerCase().includes('starter') && '🚀'}
+                        {(previewLead.serviceRequired || '').toLowerCase().includes('advanced') && '💎'}
+                        {previewLead.serviceRequired || 'General Strategy'}
+                      </span>
+                    </div>
+                    <div className="p-3.5 flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-500">Monthly Budget</span>
+                      <span className="font-black text-emerald-600 text-right">{previewLead.budget || 'Not specified'}</span>
+                    </div>
+                    <div className="p-3.5 flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-500">Website / Company</span>
+                      <span className="font-black text-blue-600 text-right truncate max-w-[220px]">
+                        {previewLead.companyName ? (
+                          <a href={previewLead.companyName.startsWith('http') ? previewLead.companyName : `https://${previewLead.companyName}`} target="_blank" rel="noreferrer" className="hover:underline">
+                            {previewLead.companyName}
+                          </a>
+                        ) : 'Not specified'}
+                      </span>
+                    </div>
+                    <div className="p-3.5 flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-500">Submitted On</span>
+                      <span className="font-black text-slate-800 text-right">
+                        {previewLead.createdAt ? new Date(previewLead.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'Just now'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-2xl bg-blue-50/70 border border-blue-200 p-5 space-y-2">
-                  <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-wider text-[#1352D0]"><MessageCircle className="w-4 h-4" /><span>Growth Message / Goals</span></div>
-                  <p className="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">{previewLead.message || 'No message attached.'}</p>
+
+                {/* Growth Message & Notes */}
+                <div className="rounded-2xl bg-blue-50/70 border border-blue-200 p-5 space-y-2.5">
+                  <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-wider text-[#1352D0]">
+                    <MessageCircle className="w-4 h-4" />
+                    <span>User Submitted Message / Audit Specs</span>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-white border border-blue-100 text-xs font-medium text-slate-800 leading-relaxed whitespace-pre-wrap font-sans shadow-xs">
+                    {previewLead.message || 'No additional message was submitted with this form entry.'}
+                  </div>
                 </div>
+
               </div>
+
+              {/* Drawer Footer Actions */}
               <div className="border-t border-slate-200 p-5 flex items-center justify-between shrink-0 bg-slate-50">
-                <button onClick={() => setPreviewLead(null)} className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-extrabold cursor-pointer">Close</button>
-                <a href={`https://wa.me/91${(previewLead.phone || '').replace(/\D/g, '').slice(-10)}`} target="_blank" rel="noreferrer" className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black tracking-wide shadow-md flex items-center space-x-1.5 cursor-pointer">
-                  <Sparkles className="w-4 h-4" /><span>WhatsApp Directly</span><ArrowRight className="w-3.5 h-3.5" />
+                <button onClick={() => setPreviewLead(null)} className="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-extrabold cursor-pointer hover:bg-slate-100 transition-all">Close Drawer</button>
+                <a
+                  href={`https://wa.me/91${(previewLead.phone || '').replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hi ${previewLead.fullName}, thank you for reaching out to Sumit DigiTech regarding ${previewLead.serviceRequired || 'growth services'}. How can we assist you today?`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black tracking-wide shadow-md flex items-center space-x-2 cursor-pointer transition-all"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>WhatsApp Lead</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </a>
               </div>
             </motion.aside>

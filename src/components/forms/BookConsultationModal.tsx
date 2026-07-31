@@ -9,12 +9,18 @@ export const BookConsultationModal: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [service, setService] = useState(selectedService || 'All Unified Services');
+  const [service, setService] = useState(selectedService || 'Growth Package');
   const [budget, setBudget] = useState('₹50,000 - ₹1,00,000');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [phoneError, setPhoneError] = useState('');
+
+  React.useEffect(() => {
+    if (selectedService) {
+      setService(selectedService);
+    }
+  }, [selectedService, isConsultationModalOpen]);
 
   if (!isConsultationModalOpen) return null;
 
@@ -275,6 +281,16 @@ export const BookConsultationModal: React.FC = () => {
                       onChange={(e) => setService(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl bg-[#0B172D] border border-slate-700/80 focus:outline-none focus:border-blue-500 text-sm text-white font-medium selection:bg-[#1352D0] selection:text-white"
                     >
+                      {service && ![
+                        'All Unified Services', 'Starter Package', 'Growth Package', 'Advanced Package',
+                        'SEO Services', 'Performance Marketing', 'Web Development', 'Social Media Marketing',
+                        'Marketplace Management', 'Branding and Design'
+                      ].includes(service) && (
+                        <option value={service}>{service}</option>
+                      )}
+                      <option value="Growth Package">⚡ Growth Package (₹8,000/mo)</option>
+                      <option value="Starter Package">🚀 Starter Package (₹5,000/mo)</option>
+                      <option value="Advanced Package">💎 Advanced Package (₹10,000/mo)</option>
                       <option value="All Unified Services">All Unified Services</option>
                       <option value="SEO Services">SEO & Organic Search</option>
                       <option value="Performance Marketing">Performance Ads (Google/Meta)</option>
